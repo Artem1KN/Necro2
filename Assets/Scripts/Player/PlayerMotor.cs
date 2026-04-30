@@ -1,0 +1,130 @@
+using Unity.Cinemachine;
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+public class PlayerMotor : MonoBehaviour
+{
+    [Header("Movement Settings")]
+    public float runSpeed = 5f;
+    public float acceleration = 10f;
+    public float deceleration = 8f;
+    public float currentSpeed;
+
+    [Header("Dash Settings")]
+    public float dashImpulse = 15f;
+    private float _dashCooldown = 0f;
+    private float _dashVelocity;
+
+    [Header("Jump & Gravity")]
+    public float jumpHeight = 2f;
+    public float gravity = -19.62f;
+    private float _verticalVelocity;
+    private int _jumpsRemaining;
+    public int maxJumps = 2;
+
+    [Header("References")]
+    [SerializeField] private CharacterController _characterController;
+    [SerializeField] private CinemachineCamera _cinemach;
+
+    private Vector2 _move;
+    private Vector3 _lastMoveDirection; // Храним направление последнего движения для инерции
+
+    void Start()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+        _jumpsRemaining = maxJumps;
+    }
+
+    public void OnMove(InputValue val)
+    {
+        _move = val.Get<Vector2>();
+    }
+
+    // В OnDash меняем логику:
+    public void OnDash(InputValue val)
+    {
+        if (val.isPressed && _dashCooldown <= 0)
+        {
+            _dashVelocity = dashImpulse; // Записываем импульс в отдельную переменную
+            _dashCooldown = 1f;
+        }
+    }
+
+    public void OnJump(InputValue val)
+    {
+        if (val.isPressed && _jumpsRemaining > 0)
+        {
+            _verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            _jumpsRemaining--;
+        }
+    }
+
+    void Update()
+    {
+        HandleAcceleration();
+        HandleGravityAndJump();
+        ApplyMovement();
+
+        if (_dashCooldown > 0) _dashCooldown -= Time.deltaTime;
+    }
+
+
+    // В HandleAcceleration меняем расчет:
+    private void HandleAcceleration()
+    {
+        float targetSpeed = _move.magnitude > 0 ? runSpeed : 0f;
+
+        if (_move.magnitude > 0)
+        {
+            _lastMoveDirection = (GetForward() * _move.y + GetRight() * _move.x).normalized;
+            currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, acceleration * Time.deltaTime);
+        }
+        else
+        {
+            currentSpeed = Mathf.MoveTowards(currentSpeed, 0f, deceleration * Time.deltaTime);
+        }
+
+        // Импульс рывка затухает очень быстро (например, за 0.2 секунды)
+        // Мы не даем ему влиять на основную currentSpeed навсегда
+        _dashVelocity = Mathf.MoveTowards(_dashVelocity, 0f, 30f * Time.deltaTime);
+    }
+
+    private void HandleGravityAndJump()
+    {
+        if (_characterController.isGrounded && _verticalVelocity < 0)
+        {
+            _verticalVelocity = -2f;
+            _jumpsRemaining = maxJumps;
+        }
+        _verticalVelocity += gravity * Time.deltaTime;
+    }
+
+
+
+    // В ApplyMovement добавляем суммирование:
+    private void ApplyMovement()
+    {
+        // Итоговая скорость = обычная скорость + затухающий импульс рывка
+        float totalSpeed = currentSpeed + _dashVelocity;
+
+        Vector3 horizontalMove = _lastMoveDirection * totalSpeed;
+        Vector3 verticalMove = Vector3.up * _verticalVelocity;
+
+        _characterController.Move((horizontalMove + verticalMove) * Time.deltaTime);
+    }
+
+    private Vector3 GetForward()
+    {
+        Vector3 forward = _cinemach.transform.forward;
+        forward.y = 0;
+        return forward.normalized;
+    }
+
+    private Vector3 GetRight()
+    {
+        Vector3 right = _cinemach.transform.right;
+        right.y = 0;
+        return right.normalized;
+    }
+}

@@ -1,0 +1,122 @@
+using Unity.Cinemachine;
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+public class PlayerMotor : MonoBehaviour
+{
+    [Header("Movement Settings")]
+    public float runSpeed = 5f;        // Максимальная скорость
+    public float acceleration = 10f;   // Как быстро разгоняемся
+    public float deceleration = 8f;    // Как быстро тормозим (инерция)
+    public float currentSpeed;         // Текущая скорость (меняется динамически)
+
+    [Header("Dash Settings")]
+    public float dashImpulse = 15f;    // Сила рывка
+    private float _dashCooldown = 0f;  // Кулдаун для защиты от спама
+
+    [Header("Jump & Gravity")]
+    public float jumpHeight = 2f;
+    public float gravity = -19.62f;    // Увеличил гравитацию для "тяжелого" ощущения (как в Doom)
+    private float _verticalVelocity;
+    private int _jumpsRemaining;
+    public int maxJumps = 2;
+
+    [Header("References")]
+    [SerializeField] private CharacterController _characterController;
+    [SerializeField] private CinemachineCamera _cinemach;
+
+    private Vector2 _move;
+
+    void Start()
+    {
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+        _jumpsRemaining = maxJumps;
+    }
+
+    public void OnMove(InputValue val)
+    {
+        _move = val.Get<Vector2>();
+    }
+
+    // Метод для Dash (вызывается из Input Actions)
+    public void OnDash(InputValue val)
+    {
+        if (val.isPressed && _dashCooldown <= 0)
+        {
+            // Даем резкий импульс к текущей скорости
+            currentSpeed += dashImpulse;
+            _dashCooldown = 1f; // Кулдаун 1 секунда
+        }
+    }
+
+    public void OnJump(InputValue val)
+    {
+        if (val.isPressed && _jumpsRemaining > 0)
+        {
+            _verticalVelocity = Mathf.Sqrt(jumpHeight * -2f * gravity);
+            _jumpsRemaining--;
+        }
+    }
+
+    void Update()
+    {
+        HandleAcceleration();
+        HandleGravityAndJump();
+        ApplyMovement();
+
+        if (_dashCooldown > 0) _dashCooldown -= Time.deltaTime;
+    }
+
+    private void HandleAcceleration()
+    {
+        // Определяем, куда мы хотим бежать (целевая скорость)
+        float targetSpeed = _move.magnitude > 0 ? runSpeed : 0f;
+
+        // Если жмем кнопки — разгоняемся (Acceleration)
+        if (_move.magnitude > 0)
+        {
+            currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, acceleration * Time.deltaTime);
+        }
+        else
+        {
+            // Если отпустили — тормозим (Deceleration), создавая инерцию
+            currentSpeed = Mathf.MoveTowards(currentSpeed, 0f, deceleration * Time.deltaTime);
+        }
+    }
+
+    private void HandleGravityAndJump()
+    {
+        if (_characterController.isGrounded && _verticalVelocity < 0)
+        {
+            _verticalVelocity = -2f; // Прижимаем к земле
+            _jumpsRemaining = maxJumps;         // Сбрасываем прыжки
+        }
+
+        _verticalVelocity += gravity * Time.deltaTime;
+    }
+
+    private void ApplyMovement()
+    {
+        // 1. Горизонтальное движение (Твоя логика + инерция)
+        Vector3 moveDirection = (GetForward() * _move.y) + (GetRight() * _move.x);
+        _characterController.Move(moveDirection * currentSpeed * Time.deltaTime);
+
+        // 2. Вертикальное движение (Гравитация/Прыжок)
+        _characterController.Move(new Vector3(0, _verticalVelocity, 0) * Time.deltaTime);
+    }
+
+    private Vector3 GetForward()
+    {
+        Vector3 forward = _cinemach.transform.forward;
+        forward.y = 0;
+        return forward.normalized;
+    }
+
+    private Vector3 GetRight()
+    {
+        Vector3 right = _cinemach.transform.right;
+        right.y = 0;
+        return right.normalized;
+    }
+}
