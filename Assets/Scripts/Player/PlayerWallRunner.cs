@@ -1,0 +1,165 @@
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+public class PlayerWallRunner : MonoBehaviour
+{
+    [Header("Wall Detection")]
+    [SerializeField] private float wallCheckDistance = 1.2f;
+    [SerializeField] private float sphereCastRadius = 0.5f;
+    [SerializeField] private LayerMask wallLayer;
+
+    [Header("Wall Run Physics")]
+    [SerializeField] private float wallRunGravityMultiplier = 0.2f;
+    [SerializeField] private float wallStickTime = 0.3f;
+    [SerializeField] private float minWallRunSpeed = 4f;
+
+    [Header("Wall Jump")]
+    [SerializeField] private float wallJumpForce = 12f;
+    [SerializeField] private float wallJumpUpwardForce = 8f;
+    [SerializeField] private float wallJumpCooldown = 0.2f;
+
+    [Header("References")]
+    [SerializeField] private PlayerMotor _playerMotor;
+    [SerializeField] private Transform _playerTransform;
+
+    private enum WallDirection { None, Left, Right }
+    private WallDirection _currentWall = WallDirection.None;
+    private bool _isWallRunning;
+    private float _wallStickTimer;
+    private float _wallJumpCooldownTimer;
+    private Vector3 _wallNormal;
+
+    public bool IsWallRunning => _isWallRunning;
+
+    void Start()
+    {
+        if (_playerMotor == null)
+            _playerMotor = GetComponent<PlayerMotor>();
+        if (_playerTransform == null)
+            _playerTransform = _playerMotor.transform;
+
+        if (wallLayer.value == 0)
+            wallLayer = LayerMask.GetMask("Wall");
+            Debug.Log("<color=yellow>WallRunner: Defaulting wallLayer to 'Wall' layer.</color>");
+    }
+
+    void Update()
+    {
+        if (_wallJumpCooldownTimer > 0)
+            _wallJumpCooldownTimer -= Time.deltaTime;
+
+        DetectWalls();
+        HandleWallRun();
+    }
+
+    public void OnJump(InputValue val)
+    {
+        if (val.isPressed && _isWallRunning && _wallJumpCooldownTimer <= 0)
+        {
+            Debug.Log("<color=cyan>WallRunner: WALL JUMP!</color>");
+            WallJump();
+        }
+    }
+
+    private void DetectWalls()
+    {
+        if (_playerMotor.IsGrounded)
+        {
+            _currentWall = WallDirection.None;
+            _isWallRunning = false;
+            _wallStickTimer = 0;
+            return;
+        }
+
+        bool canWallRun = _playerMotor.VerticalVelocity <= 2f;
+        Vector3 forward = _playerMotor.GetPlayerForward();
+
+        Vector3 rightOrigin = _playerTransform.position + Vector3.up * 0.5f;
+        Vector3 leftDir = -_playerMotor.GetPlayerRight();
+        Vector3 rightDir = _playerMotor.GetPlayerRight();
+
+        bool wallLeft = Physics.SphereCast(rightOrigin, sphereCastRadius, leftDir, out RaycastHit hitLeft, wallCheckDistance, wallLayer);
+        bool wallRight = Physics.SphereCast(rightOrigin, sphereCastRadius, rightDir, out RaycastHit hitRight, wallCheckDistance, wallLayer);
+
+        if (wallLeft && canWallRun)
+        {
+            _currentWall = WallDirection.Left;
+            _wallNormal = hitLeft.normal;
+            TryStartWallRun();
+        }
+        else if (wallRight && canWallRun)
+        {
+            _currentWall = WallDirection.Right;
+            _wallNormal = hitRight.normal;
+            TryStartWallRun();
+        }
+        else if (_isWallRunning)
+        {
+            bool stillOnWall = false;
+            Vector3 checkDir = _currentWall == WallDirection.Left ? leftDir : rightDir;
+            stillOnWall = Physics.SphereCast(rightOrigin, sphereCastRadius, checkDir, out _, wallCheckDistance, wallLayer);
+
+            if (!stillOnWall || !canWallRun)
+            {
+                _isWallRunning = false;
+                _playerMotor.GravityMultiplier = 1f;
+                _playerMotor.OverrideGravity = false;
+            }
+        }
+    }
+
+    private void TryStartWallRun()
+    {
+        if (_playerMotor.LastMoveDirection.magnitude < minWallRunSpeed)
+            return;
+
+        if (!_isWallRunning)
+        {
+            _isWallRunning = true;
+            _wallStickTimer = wallStickTime;
+        }
+
+        _playerMotor.GravityMultiplier = wallRunGravityMultiplier;
+        _playerMotor.OverrideGravity = true;
+    }
+
+    private void HandleWallRun()
+    {
+        if (!_isWallRunning)
+            return;
+
+        if (_wallStickTimer > 0)
+        {
+            _wallStickTimer -= Time.deltaTime;
+            _playerMotor.ExternalVerticalVelocity = 0.1f * _playerMotor.GravityMultiplier;
+        }
+
+        Vector3 slideDirection = Vector3.ProjectOnPlane(-_wallNormal, Vector3.up).normalized;
+        _playerMotor.AddVelocity(slideDirection * 2f * Time.deltaTime);
+    }
+
+    private void WallJump()
+    {
+        _isWallRunning = false;
+        _wallJumpCooldownTimer = wallJumpCooldown;
+
+        Vector3 jumpAway = -_wallNormal * wallJumpForce;
+        float jumpUp = wallJumpUpwardForce;
+
+        _playerMotor.ExternalVerticalVelocity = jumpUp;
+        _playerMotor.AddVelocity(jumpAway);
+
+        _playerMotor.GravityMultiplier = 1f;
+        _playerMotor.OverrideGravity = false;
+    }
+
+    private void OnDisable()
+    {
+        if (_isWallRunning)
+        {
+            _isWallRunning = false;
+            _playerMotor.GravityMultiplier = 1f;
+            _playerMotor.OverrideGravity = false;
+        }
+    }
+}
