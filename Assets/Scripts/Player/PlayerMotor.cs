@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Unity.Cinemachine;
-
 public class PlayerMotor : MonoBehaviour
 {
     [Header("Movement Settings")]
@@ -41,9 +40,7 @@ public class PlayerMotor : MonoBehaviour
         Cursor.visible = false;
         _jumpsRemaining = maxJumps;
     }
-
     public void OnMove(InputValue val) => _move = val.Get<Vector2>();
-
     public void OnDash(InputValue val)
     {
         if (val.isPressed && _dashCooldown <= 0)
@@ -52,13 +49,11 @@ public class PlayerMotor : MonoBehaviour
             _dashCooldown = 1f;
         }
     }
-
     public void OnJump(InputValue val)
     {
         if (val.isPressed)
         {
             _jumpPressedThisFrame = true; // Фиксируем нажатие для ApplyMovement
-
             if (_isWallRunning)
             {
                 // WALL JUMP: Подбрасываем вверх
@@ -72,10 +67,9 @@ public class PlayerMotor : MonoBehaviour
             }
         }
     }
-
-
     void Update()
     {
+        SyncDetectorsToCamera();
         HandleWallRunDetection();
         HandleAcceleration();
         HandleGravityAndJump();
@@ -86,7 +80,6 @@ public class PlayerMotor : MonoBehaviour
         // Но так как мы сбрасываем его внутри ApplyMovement после использования, здесь можно добавить очистку для безопасности:
         // _jumpPressedThisFrame = false; // Если хочешь, чтобы прыжок работал строго в момент нажатия
     }
-
     private void HandleWallRunDetection()
     {
         bool hitLeft = leftWallDetector.IsColliding;
@@ -95,14 +88,11 @@ public class PlayerMotor : MonoBehaviour
         if ((hitLeft || hitRight) && !_characterController.isGrounded)
         {
             _isWallRunning = true;
-
             // Берем нормаль той стены, которую нашли
             _wallNormal = hitLeft ? leftWallDetector.outHit.normal : rightWallDetector.outHit.normal;
-
             // Вычисляем направление ВДОЛЬ стены (перпендикулярно нормали и вектору Up)
             // Используем Cross product (векторное произведение)
             Vector3 wallTangent = Vector3.Cross(_wallNormal, Vector3.up);
-
             // Нам нужно выбрать правильное направление (вперед или назад вдоль стены), 
             // чтобы игрока не разворачивало назад при касании стены
             if (Vector3.Dot(wallTangent, _lastMoveDirection) < 0)
@@ -120,7 +110,6 @@ public class PlayerMotor : MonoBehaviour
             _wallRunDirection = Vector3.zero;
         }
     }
-
     private void HandleAcceleration()
     {
         float targetSpeed = _move.magnitude > 0 ? runSpeed : 0f;
@@ -137,7 +126,6 @@ public class PlayerMotor : MonoBehaviour
         }
         _dashVelocity = Mathf.MoveTowards(_dashVelocity, 0f, 30f * Time.deltaTime);
     }
-
     private void HandleGravityAndJump()
     {
         if (_characterController.isGrounded)
@@ -149,7 +137,6 @@ public class PlayerMotor : MonoBehaviour
         float currentGravity = _isWallRunning ? gravity * wallRunGravityMultiplier : gravity;
         _verticalVelocity += currentGravity * Time.deltaTime;
     }
-
     private void ApplyMovement()
     {
         float totalSpeed = currentSpeed + _dashVelocity;
@@ -169,7 +156,6 @@ public class PlayerMotor : MonoBehaviour
         // 4. Применяем итоговый вектор
         _characterController.Move((horizontalMove + verticalMove + wallJumpImpulse) * Time.deltaTime);
     }
-
     private Vector3 GetForward()
     {
         Vector3 forward = _cinemach.transform.forward;
@@ -181,5 +167,22 @@ public class PlayerMotor : MonoBehaviour
         Vector3 right = _cinemach.transform.right;
         right.y = 0;
         return right.normalized;
+    }
+    private void SyncDetectorsToCamera()
+    {
+        if (_cinemach == null) return;
+
+        // Получаем текущий поворот камеры по оси Y
+        float targetYRotation = _cinemach.transform.eulerAngles.y;
+
+        // Создаем новый кватернион: только Y, X и Z равны 0
+        Quaternion targetRotation = Quaternion.Euler(0, targetYRotation, 0);
+
+        // Применяем вращение к каждому детектору напрямую
+        if (leftWallDetector != null)
+            leftWallDetector.transform.rotation = targetRotation;
+
+        if (rightWallDetector != null)
+            rightWallDetector.transform.rotation = targetRotation;
     }
 }
