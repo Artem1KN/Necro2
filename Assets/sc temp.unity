@@ -318,6 +318,9 @@ MonoBehaviour:
   wallRunSpeed: 7
   wallJumpForce: 10
   wallRunGravityMultiplier: 0.2
+  baseFOV: 60
+  maxFOV: 75
+  fovTransitionSpeed: 10
   _characterController: {fileID: 8977288}
   _cinemach: {fileID: 674166151}
 --- !u!1 &289831092
@@ -733,6 +736,7 @@ GameObject:
   - component: {fileID: 674166151}
   - component: {fileID: 674166150}
   - component: {fileID: 674166149}
+  - component: {fileID: 674166152}
   m_Layer: 0
   m_Name: CinemachineCamera
   m_TagString: Untagged
@@ -748,13 +752,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 674166147}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0.77000034, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8977292}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0.04, z: 0}
 --- !u!114 &674166149
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -873,6 +877,35 @@ MonoBehaviour:
       BarrelClipping: 0.25
       Anamorphism: 0
   BlendHint: 0
+--- !u!114 &674166152
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 674166147}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f38bda98361e1de48a4ca2bd86ea3c17, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineRotationComposer
+  Composition:
+    ScreenPosition: {x: 0, y: 0}
+    DeadZone:
+      Enabled: 0
+      Size: {x: 0.2, y: 0.2}
+    HardLimits:
+      Enabled: 0
+      Size: {x: 0.8, y: 0.8}
+      Offset: {x: 0, y: 0}
+  CenterOnActivate: 1
+  TargetOffset: {x: 0, y: 0, z: 0}
+  Damping: {x: 0.5, y: 0.5}
+  Lookahead:
+    Enabled: 0
+    Time: 0
+    Smoothing: 0
+    IgnoreY: 0
 --- !u!1 &897070957
 GameObject:
   m_ObjectHideFlags: 0
@@ -1087,12 +1120,12 @@ Transform:
   m_GameObject: {fileID: 1378373635}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: -0.6692271, z: 0, w: 0.7430579}
-  m_LocalPosition: {x: -0.7916574, y: 1.7700003, z: 2.078166}
+  m_LocalPosition: {x: -0.7916574, y: 1.7700002, z: 2.078166}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: -83.98, z: 0}
 --- !u!1 &1494197701
 GameObject:
   m_ObjectHideFlags: 0
