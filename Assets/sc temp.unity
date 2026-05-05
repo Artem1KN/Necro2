@@ -133,6 +133,8 @@ GameObject:
   - component: {fileID: 8977289}
   - component: {fileID: 8977288}
   - component: {fileID: 8977294}
+  - component: {fileID: 8977297}
+  - component: {fileID: 8977296}
   - component: {fileID: 8977295}
   m_Layer: 0
   m_Name: Player - first
@@ -302,25 +304,51 @@ MonoBehaviour:
   m_GameObject: {fileID: 8977287}
   m_Enabled: 1
   m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3fc6d9c855c04d43a6d38c6179bbc3b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WallRunHandler
+  leftWallDetector: {fileID: 897070959}
+  rightWallDetector: {fileID: 522162863}
+  WallRunSpeed: 7
+  WallJumpForce: 10
+--- !u!114 &8977296
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8977287}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e88caef1502af741929237ff73aa93c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CameraEffectsHandler
+  baseFOV: 60
+  maxFOV: 80
+  fovTransitionSpeed: 10
+  _cinemach: {fileID: 0}
+--- !u!114 &8977297
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8977287}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cf2586b2a9339f74b8c5bb524872f107, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMotor
-  runSpeed: 5
+  runSpeed: 10
   acceleration: 10
   deceleration: 8
   currentSpeed: 0
-  dashImpulse: 15
-  jumpHeight: 2
+  dashImpulse: 30
+  jumpHeight: 4
   gravity: -19.62
   maxJumps: 2
-  leftWallDetector: {fileID: 897070959}
-  rightWallDetector: {fileID: 522162863}
-  wallRunSpeed: 7
-  wallJumpForce: 10
-  wallRunGravityMultiplier: 0.2
-  baseFOV: 60
-  maxFOV: 75
-  fovTransitionSpeed: 10
+  wallRunHandler: {fileID: 8977295}
+  cameraEffectsHandler: {fileID: 8977296}
   _characterController: {fileID: 8977288}
   _cinemach: {fileID: 674166151}
 --- !u!1 &289831092
