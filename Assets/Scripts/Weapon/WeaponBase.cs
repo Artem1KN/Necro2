@@ -41,6 +41,8 @@ public abstract class WeaponBase : MonoBehaviour
     // Обработка ЛКМ через Unity Input System (SendMessage или PlayerInput component)
     public virtual void OnAttack(InputValue value)
     {
+        Debug.Log("Test");
+        
         if (value.isPressed) 
         {
             InvokeRepeating(nameof(TryFire), 0, data.fireRate);

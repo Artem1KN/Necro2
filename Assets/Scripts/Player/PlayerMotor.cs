@@ -58,6 +58,7 @@ public class PlayerMotor : MonoBehaviour
 
     public void OnJump(InputValue val)
     {
+        Debug.Log("Test - jump");
         if (val.isPressed)
         {
             _jumpRequestedThisFrame = true;
