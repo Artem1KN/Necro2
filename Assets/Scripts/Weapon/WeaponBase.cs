@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public abstract class WeaponBase : MonoBehaviour
 {
@@ -10,7 +9,6 @@ public abstract class WeaponBase : MonoBehaviour
     public bool isOverheated = false;
     protected float lastFireTime;
 
-    // Ссылка на мотор для расчета охлаждения от скорости (назначить через WeaponManager)
     [HideInInspector] public PlayerMotor playerMotor;
 
     protected virtual void Update()
@@ -27,7 +25,7 @@ public abstract class WeaponBase : MonoBehaviour
         
         // Активное оружие остывает быстрее (activeCoolingBonus)
         float cooling = data.passiveCoolingRate * speedFactor * Time.deltaTime;
-        
+
         currentHeat -= cooling;
         currentHeat = Mathf.Clamp(currentHeat, 0, data.overheatThreshold);
 
@@ -38,66 +36,43 @@ public abstract class WeaponBase : MonoBehaviour
         }
     }
 
-    // Обработка ЛКМ через Unity Input System (SendMessage или PlayerInput component)
-    public virtual void OnAttack(InputValue value)
+    protected virtual void OnEnable()
     {
-        Debug.Log("Test");
+        // Ищем мотор только один раз при подключении оружия
+        if (playerMotor == null)
+            playerMotor = GetComponentInParent<PlayerMotor>();
         
-        if (value.isPressed) 
+        if (playerMotor != null)
         {
-            InvokeRepeating(nameof(TryFire), 0, data.fireRate);
-        }
-        else 
-        {
-            CancelInvoke(nameof(TryFire));
+            playerMotor.OnAttackPerformed += HandleAttackPerformed;
+            playerMotor.OnSkillPerformed += HandleSkillPerformed;
         }
     }
 
-    // Обработка ПКМ
-    public virtual void OnSkill(InputValue value)
+    protected virtual void OnDisable()
     {
-        if (value.isPressed)
+        if (playerMotor != null)
         {
-            ExecuteSkill();
+            playerMotor.OnAttackPerformed += HandleAttackPerformed;
+            playerMotor.OnSkillPerformed -= HandleSkillPerformed;
         }
     }
-
-    protected void TryFire()
+    private void HandleAttackPerformed()
     {
-        if (!data.isAchieved) return;
-        if (isOverheated && data.canBeBlocked) return;
-        if (Time.time < lastFireTime + data.fireRate) return;
-
-        lastFireTime = Time.time;
-        
-        // Рассчитываем урон с учетом нагрева
-        float finalDamage = CalculateDamage();
-        
-        ShootLogic(finalDamage);
-
-        // Нагрев
-        if (data.canBeBlocked || currentHeat < data.overheatThreshold)
-        {
-            currentHeat += data.heatPerShot;
-        }
-
-        if (currentHeat >= data.overheatThreshold && data.canBeBlocked)
-        {
-            isOverheated = true;
-            CancelInvoke(nameof(TryFire));
-        }
+        TryFire();
+    }
+    private void HandleSkillPerformed()
+    {
+        ExecuteSkill();
     }
 
-    private float CalculateDamage()
+    // Можно добавить метод для "привязки" оружия при старте
+    public void Initialize(PlayerMotor motor)
     {
-        if (currentHeat >= data.optimalZoneStart && currentHeat <= data.optimalZoneEnd)
-        {
-            return data.baseDamage * data.optimalHeatMultiplier;
-        }
-        return data.baseDamage;
+        playerMotor = motor;
     }
 
     // Абстрактные методы, которые реализуют конкретные пушки
-    protected abstract void ShootLogic(float damage);
+    protected abstract void TryFire();
     protected abstract void ExecuteSkill(); // Заготовка под ПКМ
 }

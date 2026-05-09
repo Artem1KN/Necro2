@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using System;
 using Unity.Cinemachine;
 
 public class PlayerMotor : MonoBehaviour
@@ -27,25 +28,37 @@ public class PlayerMotor : MonoBehaviour
     [Header("References")]
     [SerializeField] private CharacterController _characterController;
     [SerializeField] private CinemachineCamera _cinemach;
-
-    // Private State
+    public event Action OnAttackPerformed;
+    public event Action OnSkillPerformed;
     private Vector2 _move;
     private Vector3 _lastMoveDirection;
     private float _verticalVelocity;
     private int _jumpsRemaining;
     private bool _jumpRequestedThisFrame;
-    private bool _isWallRunning; // Вынесено из методов в поле класса
+    private bool _isWallRunning;
+    public WeaponBase activeWeapon;
 
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         _jumpsRemaining = maxJumps;
+        if (activeWeapon != null) { activeWeapon.Initialize(this); }        
     }
 
     // --- Input Handlers ---
-
     public void OnMove(InputValue val) => _move = val.Get<Vector2>();
+    public void OnAttack(InputValue val)
+    {
+        Debug.Log("Test - Attack - from motor");
+        if (val.isPressed) OnAttackPerformed?.Invoke();
+    }
+
+    public void OnSkill(InputValue val)
+    {
+        Debug.Log("Test - OnSkill - from motor");
+        if (val.isPressed) OnSkillPerformed?.Invoke();
+    }
 
     public void OnDash(InputValue val)
     {
@@ -74,7 +87,6 @@ public class PlayerMotor : MonoBehaviour
         HandleGravityAndJump();
         ApplyMovement();
         HandlePostMovementEffects();
-
         // Cooldown management
         if (_dashCooldown > 0) _dashCooldown -= Time.deltaTime;
     }
@@ -182,9 +194,7 @@ public class PlayerMotor : MonoBehaviour
             cameraEffectsHandler.HandleFOV(_isWallRunning, _dashVelocity);
         }
     }
-
-    // --- Helpers ---
-
+    
     private Vector3 GetForward()
     {
         if (_cinemach == null) return Vector3.forward;

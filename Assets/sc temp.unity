@@ -292,7 +292,7 @@ MonoBehaviour:
   m_ActionEvents: []
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: Keyboard&Mouse
-  m_DefaultActionMap: Player
+  m_DefaultActionMap: 
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
 --- !u!114 &8977295
@@ -351,6 +351,7 @@ MonoBehaviour:
   cameraEffectsHandler: {fileID: 8977296}
   _characterController: {fileID: 8977288}
   _cinemach: {fileID: 674166151}
+  activeWeapon: {fileID: 1799710385}
 --- !u!1 &289831092
 GameObject:
   m_ObjectHideFlags: 0
@@ -1651,7 +1652,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1799710384}
   - component: {fileID: 1799710385}
-  - component: {fileID: 1799710386}
   m_Layer: 0
   m_Name: Sword
   m_TagString: Untagged
@@ -1696,36 +1696,6 @@ MonoBehaviour:
   attackRotationAngle: 45
   blockRotationAngle: -30
   recoverRotationAngle: 0
---- !u!114 &1799710386
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1799710383}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 62899f850307741f2a39c98a8b639597, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.InputSystem::UnityEngine.InputSystem.PlayerInput
-  m_Actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
-  m_NotificationBehavior: 0
-  m_UIInputModule: {fileID: 0}
-  m_DeviceLostEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_DeviceRegainedEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_ControlsChangedEvent:
-    m_PersistentCalls:
-      m_Calls: []
-  m_ActionEvents: []
-  m_NeverAutoSwitchControlSchemes: 1
-  m_DefaultControlScheme: Keyboard&Mouse
-  m_DefaultActionMap: Sword
-  m_SplitScreenIndex: -1
-  m_Camera: {fileID: 0}
 --- !u!1 &2053592663
 GameObject:
   m_ObjectHideFlags: 0
