@@ -8,12 +8,59 @@ public abstract class WeaponBase : MonoBehaviour
     public float currentHeat = 0f;
     public bool isOverheated = false;
     protected float lastFireTime;
+    protected float lastSkillTime;
 
     [HideInInspector] public PlayerMotor playerMotor;
+
+    // Флаги состояния, которые мы будем получать из Motor
+    private bool _isAttackHeld;
+    private bool _isSkillHeld;
+
+    
 
     protected virtual void Update()
     {
         HandlePassiveCooling();
+    }
+
+     /// <summary>
+    /// Этот метод вызывается из PlayerMotor.Update каждый кадр.
+    /// </summary>
+    public void HandleContinuousInput(bool isAttackPressed, bool isSkillPressed)
+    {
+        _isAttackHeld = isAttackPressed;
+        _isSkillHeld = isSkillPressed;
+
+        // 🔫 ЛКМ: автоматический огонь (для всех оружий)
+        if (_isAttackHeld && !isOverheated)
+        {
+            if (Time.time >= lastFireTime + data.fireRate)
+            {
+                TryFire();  // ⚠️ внутри TryFire() мы вызываем Heat.ApplyHeat() — но для меча это будет только при hit!
+                lastFireTime = Time.time;
+            }
+        }
+
+        // 🛡️ ПКМ / Skill: отдельная логика
+        if (_isSkillHeld && !isOverheated)
+        {
+            // Если навык имеет cd/heat — проверяем cooldown и fireRate (если нужно)
+            bool canUseSkill = Time.time >= lastSkillTime + data.skillCooldown;
+
+            if (canUseSkill)
+            {
+                ExecuteSkill();
+
+                // ✅ Нагрев от skill только если он это предполагает
+                if (data.skillUsesHeat)
+                {
+                    currentHeat += data.heatPerSkill;
+                    currentHeat = Mathf.Clamp(currentHeat, 0, data.overheatThreshold);
+                }
+
+                lastSkillTime = Time.time; // обновляем cooldown-таймер навыка
+            }
+        }
     }
 
     private void HandlePassiveCooling()
@@ -39,31 +86,7 @@ public abstract class WeaponBase : MonoBehaviour
     protected virtual void OnEnable()
     {
         // Ищем мотор только один раз при подключении оружия
-        if (playerMotor == null)
-            playerMotor = GetComponentInParent<PlayerMotor>();
-        
-        if (playerMotor != null)
-        {
-            playerMotor.OnAttackPerformed += HandleAttackPerformed;
-            playerMotor.OnSkillPerformed += HandleSkillPerformed;
-        }
-    }
-
-    protected virtual void OnDisable()
-    {
-        if (playerMotor != null)
-        {
-            playerMotor.OnAttackPerformed += HandleAttackPerformed;
-            playerMotor.OnSkillPerformed -= HandleSkillPerformed;
-        }
-    }
-    private void HandleAttackPerformed()
-    {
-        TryFire();
-    }
-    private void HandleSkillPerformed()
-    {
-        ExecuteSkill();
+        if (playerMotor == null) playerMotor = GetComponentInParent<PlayerMotor>();
     }
 
     // Можно добавить метод для "привязки" оружия при старте
@@ -74,5 +97,5 @@ public abstract class WeaponBase : MonoBehaviour
 
     // Абстрактные методы, которые реализуют конкретные пушки
     protected abstract void TryFire();
-    protected abstract void ExecuteSkill(); // Заготовка под ПКМ
+    protected abstract void ExecuteSkill();
 }

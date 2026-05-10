@@ -28,8 +28,6 @@ public class PlayerMotor : MonoBehaviour
     [Header("References")]
     [SerializeField] private CharacterController _characterController;
     [SerializeField] private CinemachineCamera _cinemach;
-    public event Action OnAttackPerformed;
-    public event Action OnSkillPerformed;
     private Vector2 _move;
     private Vector3 _lastMoveDirection;
     private float _verticalVelocity;
@@ -37,28 +35,26 @@ public class PlayerMotor : MonoBehaviour
     private bool _jumpRequestedThisFrame;
     private bool _isWallRunning;
     public WeaponBase activeWeapon;
+    private bool _isAttacking;   
+    private bool _isSkillUsing;
+
+    private InputAction _attackAction;
+    private InputAction _skillAction;
+
+    [SerializeField] private PlayerInput playerInput;
 
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         _jumpsRemaining = maxJumps;
-        if (activeWeapon != null) { activeWeapon.Initialize(this); }        
+        if (activeWeapon != null) { activeWeapon.Initialize(this); }
+        _attackAction = playerInput.actions.FindAction("Attack");
+        _skillAction = playerInput.actions.FindAction("Skill");        
     }
 
     // --- Input Handlers ---
     public void OnMove(InputValue val) => _move = val.Get<Vector2>();
-    public void OnAttack(InputValue val)
-    {
-        Debug.Log("Test - Attack - from motor");
-        if (val.isPressed) OnAttackPerformed?.Invoke();
-    }
-
-    public void OnSkill(InputValue val)
-    {
-        Debug.Log("Test - OnSkill - from motor");
-        if (val.isPressed) OnSkillPerformed?.Invoke();
-    }
 
     public void OnDash(InputValue val)
     {
@@ -78,7 +74,8 @@ public class PlayerMotor : MonoBehaviour
         }
     }
 
-    // --- Core Logic ---
+    void OnEnable() => playerInput.actions.Enable();
+    void OnDisable() => playerInput.actions.Disable();
 
     void Update()
     {
@@ -89,6 +86,18 @@ public class PlayerMotor : MonoBehaviour
         HandlePostMovementEffects();
         // Cooldown management
         if (_dashCooldown > 0) _dashCooldown -= Time.deltaTime;
+
+        _isAttacking = _attackAction?.ReadValue<float>() > 0.5f || 
+                   (_attackAction != null && _attackAction.phase == InputActionPhase.Started || _attackAction.phase == InputActionPhase.Performed);
+
+        _isSkillUsing = _skillAction?.ReadValue<float>() > 0.5f ||
+                    (_skillAction != null && (_skillAction.phase == InputActionPhase.Started || _skillAction.phase == InputActionPhase.Performed));
+
+        // --- НОВАЯ ЛОГИКА: Передача состояния нажатия в оружие ---
+        if (activeWeapon != null)
+        {
+            activeWeapon.HandleContinuousInput(_isAttacking, _isSkillUsing);
+        }
     }
 
     private void UpdateWallRunState()

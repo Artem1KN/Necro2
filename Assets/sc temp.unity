@@ -352,6 +352,7 @@ MonoBehaviour:
   _characterController: {fileID: 8977288}
   _cinemach: {fileID: 674166151}
   activeWeapon: {fileID: 1799710385}
+  playerInput: {fileID: 8977294}
 --- !u!1 &289831092
 GameObject:
   m_ObjectHideFlags: 0
@@ -1691,11 +1692,6 @@ MonoBehaviour:
   currentHeat: 0
   isOverheated: 0
   playerMotor: {fileID: 0}
-  weaponTransform: {fileID: 1594264200}
-  attackDuration: 0.2
-  attackRotationAngle: 45
-  blockRotationAngle: -30
-  recoverRotationAngle: 0
 --- !u!1 &2053592663
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,11 +1,14 @@
 using UnityEngine;
 using System;
 
+/// <summary>
+/// Базовый класс для врагов. Реализует IDamagable.
+/// </summary>
 [RequireComponent(typeof(Collider))]
-public class PlayerHealth : MonoBehaviour, IDamagable
+public class EnemyBase : MonoBehaviour, IDamagable
 {
     [Header("Health Settings")]
-    public float maxHP = 100f;
+    public float maxHP = 50f;
     
     [Header("Events")]
     public Action<float, float> onHealthChanged; // current, max
@@ -22,7 +25,7 @@ public class PlayerHealth : MonoBehaviour, IDamagable
     }
 
     /// <summary>
-    /// Наносит урон игроку.
+    /// Наносит урон врагу.
     /// </summary>
     public float TakeDamage(float damage)
     {
@@ -43,23 +46,13 @@ public class PlayerHealth : MonoBehaviour, IDamagable
     }
 
     /// <summary>
-    /// Лечит игрока.
-    /// </summary>
-    public void Heal(float amount)
-    {
-        if (amount <= 0) return;
-
-        currentHP += amount;
-        if (currentHP > maxHP) currentHP = maxHP;
-
-        onHealthChanged?.Invoke(currentHP, maxHP);
-    }
-
-    /// <summary>
-    /// Смерть игрока.
+    /// Смерть врага.
     /// </summary>
     private void Die()
     {
         onDeath?.Invoke();
+        
+        // Уничтожаем объект после смерти
+        Destroy(gameObject);
     }
 }

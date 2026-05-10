@@ -16,8 +16,9 @@ MonoBehaviour:
   isAchieved: 0
   baseDamage: 25
   optimalHeatMultiplier: 1.5
-  fireRate: 0.2
-  heatPerShot: 0
+  fireRate: 1.5
+  heatPerShot: 5
+  appliesToMeleeOnlyOnHit: 1
   passiveCoolingRate: 10
   activeCoolingBonus: 1.5
   canBeBlocked: 0
@@ -25,6 +26,9 @@ MonoBehaviour:
   recoveryThreshold: 50
   optimalZoneStart: 70
   optimalZoneEnd: 90
+  skillUsesHeat: 1
+  heatPerSkill: 5
+  skillCooldown: 1.5
   weaponPrefab: {fileID: 0}
   recoilStrength: 0.1
   recoilDuration: 0.1

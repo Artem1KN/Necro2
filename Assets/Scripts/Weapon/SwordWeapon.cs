@@ -1,76 +1,54 @@
 using UnityEngine;
-using DG.Tweening;
+using System.Collections.Generic;
 
 public class SwordWeapon : WeaponBase
 {
-    [Header("Animation Settings")]
-    [SerializeField] private Transform weaponTransform;
-    [SerializeField] private float attackDuration = 0.2f;
-    [SerializeField] private float attackRotationAngle = 45f;
-    [SerializeField] private float blockRotationAngle = -30f;
-    [SerializeField] private float recoverRotationAngle = 0f;
-    private Vector3 _initialRotation;
-    
-    protected void ShootLogic(float damage)
+    [Header("Attack Settings")]
+    public LayerMask enemyLayers; // Слой для врагов
+    public float attackRange = 2f;
+    public float attackRadius = 1f;
+
+    // Внутренняя логика нанесения урона (физика, триггеры и т.д.)
+    protected void PerformAttack(float damage)
     {
-        Debug.Log($"[Sword] Attack! Damage: {damage} (from SwordWeapon.ShootLogic)");
-
-        // Анимация взмаха: быстрый поворот вперед и возврат
-        Sequence attackSeq = DOTween.Sequence();
-        attackSeq.Append(weaponTransform.DOLocalRotate(new Vector3(attackRotationAngle, 0, 0), attackDuration * 0.5f)
-            .SetEase(Ease.OutQuad)) // Быстрый взмах
-            .Append(weaponTransform.DOLocalRotate(new Vector3(recoverRotationAngle, 0, 0), attackDuration * 0.5f)
-            .SetEase(Ease.InQuad)); // Плавный возврат
-    }
-
-    // Добавлено: обработка TryFire для Sword (вызывается каждые fireRate приHoldAttack)
-    protected override void TryFire()
-    {
-        Debug.Log("[Sword] TryFire called - triggering attack");
-
-        // Если оружие не перегрето и можно стрелять
-        if (!isOverheated && Time.time >= lastFireTime + data.fireRate)
+        // Получаем все колайдеры в зоне атаки
+        Collider[] hitColliders = Physics.OverlapSphere(transform.position, attackRange, enemyLayers);
+        
+        List<EnemyBase> enemiesHit = new List<EnemyBase>();
+        
+        foreach (var collider in hitColliders)
         {
-            lastFireTime = Time.time;
-            ShootLogic(data.baseDamage); // <-- здесь происходит атака меча
-
-            // Можно добавить проверку на блок: если сейчас в режиме block, не атаковать
-            if (weaponTransform.localRotation.eulerAngles.x == blockRotationAngle)
+            EnemyBase enemy = collider.GetComponent<EnemyBase>();
+            if (enemy != null && !enemiesHit.Contains(enemy))
             {
-                Debug.LogWarning("[Sword] Cannot attack while blocking!");
-                return;
+                // Наносим урон через IDamagable
+                enemy.TakeDamage(damage);
+                enemiesHit.Add(enemy);
             }
         }
-        else if (isOverheated)
-        {
-            Debug.LogWarning("[Sword] Weapon is overheated!");
-        }
+        
+        Debug.Log($"[Sword] Attack! Damage: {damage}, Enemies hit: {enemiesHit.Count}");
     }
 
+    // Этот метод вызывается из WeaponBase.HandleContinuousInput, когда таймер fireRate прошел и кнопка зажата.
+    protected override void TryFire()
+    {
+        // Нам НЕ НУЖНО проверять Time.time здесь, так как это уже сделал базовый класс.
+        // Нам НЕ НУЖНО проверять isOverheated здесь, так как это тоже сделал базовый класс.
+        
+        Debug.Log("[Sword] Swing animation/logic triggered");
+        PerformAttack(data.baseDamage);
+    }
+
+    // Этот метод вызывается из WeaponBase.HandleContinuousInput при зажатой ПКМ
     protected override void ExecuteSkill()
     {
-        Debug.Log("Sword Blocking...");
-        // Анимация блока: смещение меча чуть вперед или поворот в защитную позицию
-        weaponTransform.DOKill(); // Останавливаем предыдущие анимации, чтобы не было конфликтов
-        weaponTransform.DOLocalRotate(new Vector3(blockRotationAngle, 0, 0), attackDuration)
-            .SetEase(Ease.OutBack);
+        // В бумер-шутере блок — это состояние. 
+        // Если мы попали сюда, значит таймер fireRate прошел.
+        // Для меча "навык" (ПКМ) может быть либо мгновенным ударом, либо переключением режима в "Блок".
+        
+        Debug.Log("[Sword] Skill/Block Active");
     }
 
-    // Дополнительно: можно добавить дебаг при старте/окончании атаки
-    private void HandleAttackStarted()
-    {
-        Debug.Log("[Sword] Attack started (HandleAttackStarted)");
-    }
-
-    private void HandleAttackEnded()
-    {
-        Debug.Log("[Sword] Attack ended (HandleAttackEnded)");
-    }
-
-    // Вспомогательный метод для сброса позиции (вызывать, если меч "застрял" в анимации)
-    public void ResetWeaponPosition()
-    {
-        weaponTransform.DOKill();
-        weaponTransform.localRotation = Quaternion.identity;
-    }
+    // Дополнительно: если вы хотите, чтобы блок ПРЕКРАЩАЛСЯ, когда отпускают кнопку, вам может понадобиться переопределить HandleContinuousInput или добавить логику в Update.
 }
