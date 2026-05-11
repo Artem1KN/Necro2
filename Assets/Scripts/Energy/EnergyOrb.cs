@@ -23,7 +23,7 @@ public class EnergyOrb : MonoBehaviour
     private void Update()
     {
         // Автоматический сбор орба игроком
-        PlayerHealth player = FindObjectOfType<PlayerHealth>();
+        PlayerHealth player = FindAnyObjectByType<PlayerHealth>();
         if (player != null)
         {
             float distance = Vector3.Distance(transform.position, player.transform.position);
