@@ -42,6 +42,7 @@ public class PlayerMotor : MonoBehaviour
     private InputAction _skillAction;
 
     [SerializeField] private PlayerInput playerInput;
+    public PlayerHealth playerHealth;
 
     void Start()
     {

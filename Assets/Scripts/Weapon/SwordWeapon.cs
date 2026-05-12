@@ -4,14 +4,13 @@ using System.Collections.Generic;
 public class SwordWeapon : WeaponBase
 {
     [Header("Attack Settings")]
-    public LayerMask enemyLayers; // Слой для врагов
+    public LayerMask enemyLayers;
     public float attackRange = 2f;
     public float attackRadius = 1f;
+    public GameObject energyOrbPrefab;
 
-    // Внутренняя логика нанесения урона (физика, триггеры и т.д.)
     protected void PerformAttack(float damage)
     {
-        // Получаем все колайдеры в зоне атаки
         Collider[] hitColliders = Physics.OverlapSphere(transform.position, attackRange, enemyLayers);
         
         List<EnemyBase> enemiesHit = new List<EnemyBase>();
@@ -21,8 +20,8 @@ public class SwordWeapon : WeaponBase
             EnemyBase enemy = collider.GetComponent<EnemyBase>();
             if (enemy != null && !enemiesHit.Contains(enemy))
             {
-                // Наносим урон через IDamagable
-                enemy.TakeDamage(damage);
+                Vector3 hitPoint = collider.ClosestPointOnBounds(transform.position);
+                OnHitEnemy(enemy, hitPoint);
                 enemiesHit.Add(enemy);
             }
         }
@@ -30,25 +29,92 @@ public class SwordWeapon : WeaponBase
         Debug.Log($"[Sword] Attack! Damage: {damage}, Enemies hit: {enemiesHit.Count}");
     }
 
-    // Этот метод вызывается из WeaponBase.HandleContinuousInput, когда таймер fireRate прошел и кнопка зажата.
     protected override void TryFire()
     {
-        // Нам НЕ НУЖНО проверять Time.time здесь, так как это уже сделал базовый класс.
-        // Нам НЕ НУЖНО проверять isOverheated здесь, так как это тоже сделал базовый класс.
-        
-        Debug.Log("[Sword] Swing animation/logic triggered");
-        PerformAttack(data.baseDamage);
+        if (data.appliesToMeleeOnlyOnHit)
+        {
+            PerformAttack(data.baseDamage);
+        }
+        else
+        {
+            currentHeat += data.heatPerShot;
+            currentHeat = Mathf.Clamp(currentHeat, 0, data.overheatThreshold);
+            
+            Debug.Log("[Sword] Swing animation/logic triggered");
+            OnMiss();
+        }
     }
 
-    // Этот метод вызывается из WeaponBase.HandleContinuousInput при зажатой ПКМ
     protected override void ExecuteSkill()
     {
-        // В бумер-шутере блок — это состояние. 
-        // Если мы попали сюда, значит таймер fireRate прошел.
-        // Для меча "навык" (ПКМ) может быть либо мгновенным ударом, либо переключением режима в "Блок".
+        float damage = data.baseDamage * 2f;
         
-        Debug.Log("[Sword] Skill/Block Active");
+        PerformAttack(damage);
+        
+        currentHeat += data.heatPerShot * 3f;
+        currentHeat = Mathf.Clamp(currentHeat, 0, data.overheatThreshold);
+        
+        lastSkillTime = Time.time;
     }
 
-    // Дополнительно: если вы хотите, чтобы блок ПРЕКРАЩАЛСЯ, когда отпускают кнопку, вам может понадобиться переопределить HandleContinuousInput или добавить логику в Update.
+    protected void OnHitEnemy(EnemyBase enemy, Vector3 hitPoint)
+    {
+        float damage = data.baseDamage;
+        
+        if (currentHeat >= data.optimalZoneStart && currentHeat <= data.optimalZoneEnd)
+        {
+            damage *= data.optimalHeatMultiplier;
+        }
+        
+        enemy.TakeDamage(damage);
+        
+        currentHeat += data.heatPerShot;
+        currentHeat = Mathf.Clamp(currentHeat, 0, data.overheatThreshold);
+        
+        /*if (enemy.CurrentHP == 0)
+        {
+            SpawnEnergyOrb(enemy);
+        }*/
+    }
+
+    protected void OnMiss()
+    {
+    }
+
+/*
+    protected void SpawnEnergyOrb(EnemyBase enemy)
+    {
+        if (energyOrbPrefab != null && enemy != null)
+        {
+            OrbData orbData = energyOrbPrefab.GetComponent<EnergyOrb>()?.orbData;
+            
+            if (orbData == null)
+            {
+                GameObject orbObj = Instantiate(energyOrbPrefab, enemy.transform.position, Quaternion.identity);
+                EnergyOrb orb = orbObj.GetComponent<EnergyOrb>();
+                
+                if (orb != null && playerMotor != null && playerMotor.playerHealth != null)
+                {
+                    PlayerHealth player = playerMotor.playerHealth;
+                    orb.Setup(player.Heal, null);
+                }
+            }
+            else
+            {
+                GameObject orbObj = Instantiate(energyOrbPrefab, enemy.transform.position, Quaternion.identity);
+                EnergyOrb orb = orbObj.GetComponent<EnergyOrb>();
+                
+                if (orb != null && orb.orbData == null)
+                {
+                    orb.orbData = orbData;
+                }
+                
+                if (orb != null && playerMotor != null && playerMotor.playerHealth != null)
+                {
+                    PlayerHealth player = playerMotor.playerHealth;
+                    orb.Setup(player.Heal, null);
+                }
+            }
+        }
+    }*/
 }
