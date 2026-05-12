@@ -15,9 +15,6 @@ public abstract class WeaponBase : MonoBehaviour
     // Флаги состояния, которые мы будем получать из Motor
     private bool _isAttackHeld;
     private bool _isSkillHeld;
-
-    
-
     protected virtual void Update()
     {
         HandlePassiveCooling();
@@ -41,24 +38,13 @@ public abstract class WeaponBase : MonoBehaviour
             }
         }
 
-        // 🛡️ ПКМ / Skill: отдельная логика
-        if (_isSkillHeld && !isOverheated)
+        // 🛡️ ПКМ / Skill: такая же логика
+        if (_isSkillHeld && !isOverheated) //Если навык имеет cd/heat — проверяем cooldown
         {
-            // Если навык имеет cd/heat — проверяем cooldown и fireRate (если нужно)
-            bool canUseSkill = Time.time >= lastSkillTime + data.skillCooldown;
-
-            if (canUseSkill)
+            if (Time.time >= lastSkillTime + data.skillCooldown)
             {
                 ExecuteSkill();
-
-                // ✅ Нагрев от skill только если он это предполагает
-                if (data.skillUsesHeat)
-                {
-                    currentHeat += data.heatPerSkill;
-                    currentHeat = Mathf.Clamp(currentHeat, 0, data.overheatThreshold);
-                }
-
-                lastSkillTime = Time.time; // обновляем cooldown-таймер навыка
+                lastSkillTime = Time.time;
             }
         }
     }

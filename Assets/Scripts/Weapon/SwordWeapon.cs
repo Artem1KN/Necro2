@@ -4,117 +4,116 @@ using System.Collections.Generic;
 public class SwordWeapon : WeaponBase
 {
     [Header("Attack Settings")]
-    public LayerMask enemyLayers;
+    public LayerMask enemyLayers; // Слой для врагов
     public float attackRange = 2f;
     public float attackRadius = 1f;
-    public GameObject energyOrbPrefab;
+    public Transform attackPoint; // Drag here in Inspector! 🎯
+    // Внутренняя логика нанесения урона (физика, триггеры и т.д.)
+
+
+        // Этот метод вызывается из WeaponBase.HandleContinuousInput, когда таймер fireRate прошел и кнопка зажата.
+    protected override void TryFire()
+    {
+        // Нам НЕ НУЖНО проверять Time.time здесь, так как это уже сделал базовый класс.
+        // Нам НЕ НУЖНО проверять isOverheated здесь, так как это тоже сделал базовый класс.
+        Debug.Log("[Sword] Swing animation/logic triggered");
+        PerformAttack(data.baseDamage);
+    }
 
     protected void PerformAttack(float damage)
     {
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, attackRange, enemyLayers);
-        
+        if (attackPoint == null) 
+        {
+            Debug.LogError("[Sword] Attack point not assigned!", this);
+            return;
+        }
+
+        Collider[] hitColliders = Physics.OverlapSphere(attackPoint.position, attackRange, enemyLayers);
         List<EnemyBase> enemiesHit = new List<EnemyBase>();
-        
+
         foreach (var collider in hitColliders)
         {
             EnemyBase enemy = collider.GetComponent<EnemyBase>();
             if (enemy != null && !enemiesHit.Contains(enemy))
             {
-                Vector3 hitPoint = collider.ClosestPointOnBounds(transform.position);
-                OnHitEnemy(enemy, hitPoint);
+                enemy.TakeDamage(damage);
                 enemiesHit.Add(enemy);
+                // Добавь визуальный эффект попадания или звук здесь — для подтверждения урона
             }
         }
-        
+
         Debug.Log($"[Sword] Attack! Damage: {damage}, Enemies hit: {enemiesHit.Count}");
-    }
 
-    protected override void TryFire()
-    {
-        if (data.appliesToMeleeOnlyOnHit)
+        // 🔥 Применяем нагрев только если есть попадание и разрешено
+        if (enemiesHit.Count > 0)
         {
-            PerformAttack(data.baseDamage);
-        }
-        else
-        {
-            currentHeat += data.heatPerShot;
-            currentHeat = Mathf.Clamp(currentHeat, 0, data.overheatThreshold);
-            
-            Debug.Log("[Sword] Swing animation/logic triggered");
-            OnMiss();
+            ApplyHeat(data.heatPerShot);
         }
     }
 
+    // Этот метод вызывается из WeaponBase.HandleContinuousInput при зажатой ПКМ
     protected override void ExecuteSkill()
     {
-        float damage = data.baseDamage * 2f;
-        
-        PerformAttack(damage);
-        
-        currentHeat += data.heatPerShot * 3f;
-        currentHeat = Mathf.Clamp(currentHeat, 0, data.overheatThreshold);
-        
-        lastSkillTime = Time.time;
+        // В бумер-шутере блок — это состояние. 
+        // Если мы попали сюда, значит таймер fireRate прошел.
+        // Для меча "навык" (ПКМ) может быть либо мгновенным ударом, либо переключением режима в "Блок".
+        Debug.Log("[Sword] Skill/Block Active");
+        //Block_Enemy_Projectile();
     }
-
-    protected void OnHitEnemy(EnemyBase enemy, Vector3 hitPoint)
-    {
-        float damage = data.baseDamage;
-        
-        if (currentHeat >= data.optimalZoneStart && currentHeat <= data.optimalZoneEnd)
-        {
-            damage *= data.optimalHeatMultiplier;
-        }
-        
-        enemy.TakeDamage(damage);
-        
-        currentHeat += data.heatPerShot;
-        currentHeat = Mathf.Clamp(currentHeat, 0, data.overheatThreshold);
-        
-        /*if (enemy.CurrentHP == 0)
-        {
-            SpawnEnergyOrb(enemy);
-        }*/
-    }
-
-    protected void OnMiss()
-    {
-    }
+    // Дополнительно: если вы хотите, чтобы блок ПРЕКРАЩАЛСЯ, когда отпускают кнопку, вам может понадобиться переопределить HandleContinuousInput или добавить логику в Update.
 
 /*
-    protected void SpawnEnergyOrb(EnemyBase enemy)
+    protected void Block_Enemy_Projectile()
     {
-        if (energyOrbPrefab != null && enemy != null)
+        // Для меча "навык" — это блок/парирование.
+        // Если мы здесь — значит таймер skillCooldown прошёл и оружие не перегрето (проверено в WeaponBase).
+        
+        Debug.Log("[Sword] Skill/Block Active");
+
+        // Попытка парирования: проверяем, есть ли атакующий враг в радиусе блока
+        if (playerMotor == null) return;
+
+        // Примерный радиус блока — можно вынести в WeaponData
+        float blockRadius = 2f;
+        Collider[] hitColliders = Physics.OverlapSphere(playerMotor.transform.position, blockRadius, enemyLayers);
+
+        bool wasBlocked = false;
+        foreach (var collider in hitColliders)
         {
-            OrbData orbData = energyOrbPrefab.GetComponent<EnergyOrb>()?.orbData;
-            
-            if (orbData == null)
+            EnemyBase enemy = collider.GetComponent<EnemyBase>();
+            if (enemy != null && !wasBlocked)
             {
-                GameObject orbObj = Instantiate(energyOrbPrefab, enemy.transform.position, Quaternion.identity);
-                EnergyOrb orb = orbObj.GetComponent<EnergyOrb>();
+                // Проверяем направление атаки — для простоты считаем, что парирование срабатывает при близости
+                // В реальном проекте можно добавить проверку угла между вектором взгляда игрока и направлением к врагу.
                 
-                if (orb != null && playerMotor != null && playerMotor.playerHealth != null)
+                // Если враг атакует (можно добавить флаг isAttacking), то блокируем
+                if (enemy.TryBlockAttack())
                 {
-                    PlayerHealth player = playerMotor.playerHealth;
-                    orb.Setup(player.Heal, null);
-                }
-            }
-            else
-            {
-                GameObject orbObj = Instantiate(energyOrbPrefab, enemy.transform.position, Quaternion.identity);
-                EnergyOrb orb = orbObj.GetComponent<EnergyOrb>();
-                
-                if (orb != null && orb.orbData == null)
-                {
-                    orb.orbData = orbData;
-                }
-                
-                if (orb != null && playerMotor != null && playerMotor.playerHealth != null)
-                {
-                    PlayerHealth player = playerMotor.playerHealth;
-                    orb.Setup(player.Heal, null);
+                    wasBlocked = true;
+                    break;
                 }
             }
         }
-    }*/
+
+        if (wasBlocked)
+        {
+            Debug.Log("[Sword] Block successful!");
+            
+            // Нагрев при успешном парировании, если настроено
+            if (data.skillUsesHeat && !isOverheated)
+            {
+                ApplyHeat(data.heatPerSkill);
+            }
+        }
+    }
+*/
+
+    /// <summary>
+    /// Вспомогательный метод для применения тепла (вынесен из WeaponBase, чтобы не дублировать логику).
+    /// </summary>
+    private void ApplyHeat(float amount)
+    {
+        currentHeat += amount;
+        currentHeat = Mathf.Clamp(currentHeat, 0, data.overheatThreshold);
+    }
 }
