@@ -56,8 +56,9 @@ public abstract class WeaponBase : MonoBehaviour
         // Логика: охлаждение зависит от скорости игрока
         float speedFactor = (playerMotor != null) ? Mathf.Max(1f, playerMotor.currentSpeed) : 1f;
         
-        // Активное оружие остывает быстрее (activeCoolingBonus)
-        float cooling = data.passiveCoolingRate * speedFactor * Time.deltaTime;
+        // Охлаждение за секунду (passiveCoolingRate в WeaponData - это единицы охлаждения в секунду)
+        float coolingPerSecond = data.passiveCoolingRate * speedFactor;
+        float cooling = coolingPerSecond * Time.deltaTime;
 
         currentHeat -= cooling;
         currentHeat = Mathf.Clamp(currentHeat, 0, data.overheatThreshold);

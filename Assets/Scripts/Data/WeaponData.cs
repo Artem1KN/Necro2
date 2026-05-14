@@ -13,9 +13,9 @@ public class WeaponData : ScriptableObject
     public float fireRate = 0.2f;             // Интервал между выстрелами/атаками (сек)
 
     [Header("Heat Mechanics")]
-    public float heatPerShot = 5f;            // ✅ добавлено: нагрев за *одну* атаку
-    public bool appliesToMeleeOnlyOnHit = false; // ⭐ НОВОЕ — меч нагревается только при попадании (а не при каждом вызове TryFire)
-    public float passiveCoolingRate = 10f;
+     public float heatPerShot = 5f;            // ✅ добавлено: нагрев за *одну* атаку
+     public bool appliesToMeleeOnlyOnHit = false; // ⭐ НОВОЕ — меч нагревается только при попадании (а не при каждом вызове TryFire)
+     public float passiveCoolingRate = 10f;    // Охлаждение за секунду (например: 2 = теряем 2 единицы тепла в секунду)
     public float activeCoolingBonus = 1.5f;   // Уже используется в HandlePassiveCooling как множитель скорости охлаждения
     public bool canBeBlocked = true;          // ⭐ Меч: false — он не блокируется, но может блокировать/парировать
     public float overheatThreshold = 100f;
@@ -34,7 +34,5 @@ public class WeaponData : ScriptableObject
     public GameObject weaponPrefab;
     public float recoilStrength = 0.1f;
     public float recoilDuration = 0.1f;
-
-
-    
+    public float spreadAngle = 5f;
 }
