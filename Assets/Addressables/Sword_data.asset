@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Sword_data
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   weaponName: 
-  isAchieved: 0
+  isAchieved: 1
   baseDamage: 25
   optimalHeatMultiplier: 1.5
   fireRate: 1.5
@@ -32,3 +32,4 @@ MonoBehaviour:
   weaponPrefab: {fileID: 0}
   recoilStrength: 0.1
   recoilDuration: 0.1
+  spreadAngle: 5

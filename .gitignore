@@ -5,6 +5,7 @@
 # Custom
 /[Aa]ssets/.kilo/
 /.vscode/
+/.[Kk]ilo/
 # 
 .utmp/
 /[Ll]ibrary/

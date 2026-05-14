@@ -35,6 +35,8 @@ public class PlayerMotor : MonoBehaviour
     private bool _jumpRequestedThisFrame;
     private bool _isWallRunning;
     public WeaponBase activeWeapon;
+    [Header("Weapon Management")]
+    [SerializeField] private WeaponManager weaponManager;
     private bool _isAttacking;   
     private bool _isSkillUsing;
 
@@ -49,13 +51,16 @@ public class PlayerMotor : MonoBehaviour
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
         _jumpsRemaining = maxJumps;
-        if (activeWeapon != null) { activeWeapon.Initialize(this); }
+        // Weapon initialization now handled by WeaponManager
+        // Remove direct initialization to avoid duplicate calls
+
         _attackAction = playerInput.actions.FindAction("Attack");
         _skillAction = playerInput.actions.FindAction("Skill");        
     }
 
     // --- Input Handlers ---
     public void OnMove(InputValue val) => _move = val.Get<Vector2>();
+    
 
     public void OnDash(InputValue val)
     {
@@ -72,6 +77,30 @@ public class PlayerMotor : MonoBehaviour
         if (val.isPressed)
         {
             _jumpRequestedThisFrame = true;
+        }
+    }
+
+    public void On_1(InputValue val)
+    {
+        if (val.isPressed && weaponManager != null)
+        {
+            weaponManager.SwitchWeapon(0);
+        }
+    }
+
+    public void On_2(InputValue val)
+    {
+        if (val.isPressed && weaponManager != null)
+        {
+            weaponManager.SwitchWeapon(1);
+        }
+    }
+
+    public void OnQuickSwap(InputValue val)
+    {
+        if (val.isPressed && weaponManager != null)
+        {
+            weaponManager.QuickSwap();
         }
     }
 

@@ -137,6 +137,7 @@ GameObject:
   - component: {fileID: 8977296}
   - component: {fileID: 8977295}
   - component: {fileID: 8977298}
+  - component: {fileID: 8977299}
   m_Layer: 8
   m_Name: Player
   m_TagString: Untagged
@@ -352,7 +353,8 @@ MonoBehaviour:
   cameraEffectsHandler: {fileID: 8977296}
   _characterController: {fileID: 8977288}
   _cinemach: {fileID: 674166151}
-  activeWeapon: {fileID: 717231494}
+  activeWeapon: {fileID: 1799710385}
+  weaponManager: {fileID: 8977299}
   playerInput: {fileID: 8977294}
   playerHealth: {fileID: 8977298}
 --- !u!114 &8977298
@@ -368,6 +370,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
   maxHP: 100
+--- !u!114 &8977299
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8977287}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9068ba374b34f3b448f7725245f28a90, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::WeaponManager
+  allWeapons:
+  - {fileID: 1799710385}
+  - {fileID: 717231494}
+  currentSlot: 2
+  quickSwapCooldown: 0.3
+  playerMotor: {fileID: 8977297}
 --- !u!1 &289831092
 GameObject:
   m_ObjectHideFlags: 0
@@ -2041,7 +2061,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &1799710384
 Transform:
   m_ObjectHideFlags: 0
@@ -2122,7 +2142,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2053592664}
-  - component: {fileID: 2053592665}
   m_Layer: 8
   m_Name: WeaponHolder
   m_TagString: Untagged
@@ -2147,18 +2166,6 @@ Transform:
   - {fileID: 717231493}
   m_Father: {fileID: 674166148}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2053592665
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2053592663}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9068ba374b34f3b448f7725245f28a90, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::NewMonoBehaviourScript
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

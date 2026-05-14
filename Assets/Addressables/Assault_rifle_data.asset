@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Assault_rifle_data
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   weaponName: Assault Rifle
-  isAchieved: 0
+  isAchieved: 1
   baseDamage: 8
   optimalHeatMultiplier: 1.5
   fireRate: 0.4
