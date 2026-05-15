@@ -1,3 +1,5 @@
+// by local qwen coder
+
 using UnityEngine;
 using UnityEngine.InputSystem;
 using System;
@@ -45,6 +47,14 @@ public class PlayerMotor : MonoBehaviour
 
     [SerializeField] private PlayerInput playerInput;
     public PlayerHealth playerHealth;
+
+    // Добавьте эти поля в класс (если ещё не добавлены):
+    [Header("Consts")]
+    private const float NonLinearFrictionBase = 1.5f; // Базовый коэффициент затухания
+    private const float FrictionExponentFactor = 0.3f; // Коэффициент для экспоненты (чем больше — тем резче торможение при высокой скорости)
+    private float _frictionMultiplier;
+
+    private bool isIceLocation = false;
 
     void Start()
     {
@@ -206,24 +216,63 @@ public class PlayerMotor : MonoBehaviour
     {
         float totalHorizontalSpeed = currentSpeed + _dashVelocity;
         
-        // Determine horizontal direction
-        Vector3 horizontalMove = _isWallRunning 
-            ? wallRunHandler.WallRunDirection * wallRunHandler.WallRunSpeed 
-            : _lastMoveDirection * totalHorizontalSpeed;
+        // Определяем направление движения
+        Vector3 horizontalMove = Vector3.zero;
+
+        if (_isWallRunning)
+        {
+            horizontalMove = wallRunHandler.WallRunDirection * (currentSpeed + _dashVelocity);
+        }
+        else
+        {
+            // Для обычной поверхности — используем направление, сохранённое в _lastMoveDirection
+            horizontalMove = _lastMoveDirection * totalHorizontalSpeed;
+        }
 
         Vector3 verticalMove = Vector3.up * _verticalVelocity;
-        
-        // Wall Jump Impulse
+
+        // Wall Jump Impulse (оставлен как есть)
         Vector3 wallJumpImpulse = Vector3.zero;
-        if (_isWallRunning && _jumpRequestedThisFrame) // Note: jump logic handled in HandleGravity, but we use impulse here
+        if (_isWallRunning && _jumpRequestedThisFrame)
         {
-            // This part is tricky because OnJump sets the flag. 
-            // If you want a "kick off" effect, it's best kept as a separate physics force.
-            // For now, keeping your original logic structure:
             wallJumpImpulse = wallRunHandler.WallNormal * wallRunHandler.WallJumpForce;
         }
 
-        _characterController.Move((horizontalMove + verticalMove + wallJumpImpulse) * Time.deltaTime);
+        // === ЛОГИКА ИНЕРЦИИ В ЗАВИСИМОСТИ ОТ ПОВЕРХНОСТИ ===
+        if (isIceLocation)
+        {
+            // Старая реализация: линейное замедление через deceleration
+            // (не изменена — как в оригинале)
+            currentSpeed = Mathf.MoveTowards(currentSpeed, 0f, deceleration * Time.deltaTime);
+            
+            // Применяем движение
+            _characterController.Move((horizontalMove + verticalMove + wallJumpImpulse) * Time.deltaTime);
+        }
+        else
+        {
+            // Новая реализация: экспоненциальное затухание скорости
+            // Затухаем только если есть горизонтальная скорость (dash не входит в трение — он тушится отдельно)
+            if (totalHorizontalSpeed > 0.01f && _move.magnitude == 0f) // только если пользователь перестал вводить движение
+            {
+                currentSpeed = ApplyNonLinearDecay(currentSpeed, Time.deltaTime);
+            }
+
+            // Обработка затухания дэша — как и раньше (но можно усилить при не-леде)
+            if (_dashVelocity > 0.01f && _move.magnitude == 0f)
+            {
+                _dashVelocity = Mathf.MoveTowards(_dashVelocity, 0f, 30f * Time.deltaTime);
+            }
+
+            // Применяем движение
+            _characterController.Move((horizontalMove + verticalMove + wallJumpImpulse) * Time.deltaTime);
+
+            // Дополнительно: при высокой скорости — чуть резче тормозим (для динамики)
+            if (_move.magnitude == 0f && currentSpeed > 5f && !isIceLocation)
+            {
+                // Небольшое "резкое" затухание, если скорость высока и ввод отсутствует
+                currentSpeed *= 0.98f; 
+            }
+        }
     }
 
     private void HandlePostMovementEffects()
@@ -248,5 +297,29 @@ public class PlayerMotor : MonoBehaviour
         Vector3 right = _cinemach.transform.right;
         right.y = 0;
         return right.normalized;
+    }
+
+    // Вспомогательный метод: вычисляет множитель трения на основе текущей скорости
+    private float CalculateNonLinearFriction(float currentSpeed)
+    {
+        // Экспоненциальный рост сопротивления: e^(k * v) - 1
+        // Вычитаем 1, чтобы при v=0 трение было 0 (не тормозить стоячего персонажа)
+        return NonLinearFrictionBase + FrictionExponentFactor * currentSpeed;
+    }
+
+    // Вспомогательный метод: затухание скорости с экспоненциальным коэффициентом
+    private float ApplyNonLinearDecay(float speed, float deltaTime)
+    {
+        if (speed <= 0.01f) return 0f;
+
+        // Чем выше скорость — тем больше трение → быстрее затухание
+        _frictionMultiplier = CalculateNonLinearFriction(speed);
+        
+        // Экспоненциальное затухание: v' = v * e^(-k * v * dt)
+        // Или линейное приближение с переменным коэффициентом:
+        float decayFactor = 1f - (_frictionMultiplier * deltaTime);
+        
+        // Защита от переторможения (скорость не должна стать отрицательной)
+        return Mathf.Max(0f, speed * decayFactor);
     }
 }
