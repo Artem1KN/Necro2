@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5bcd879653b224341b63e6125b5c17f1, type: 3}
   m_Name: Sword_data
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
-  weaponName: 
+  weaponName: Sword
   isAchieved: 1
   baseDamage: 25
   optimalHeatMultiplier: 1.5

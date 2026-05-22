@@ -12,14 +12,16 @@ public class WeaponManager : MonoBehaviour
     [Header("References")]
     [SerializeField] private PlayerMotor playerMotor;
 
-    private InputAction _weapon1Action;
-    private InputAction _weapon2Action;
-    private InputAction _quickSwapAction;
+    //private InputAction _weapon1Action;
+    //private InputAction _weapon2Action;
+    //private InputAction _quickSwapAction;
     private float quickSwapTimer = 0f;
 
     public WeaponBase ActiveWeapon => (allWeapons != null && allWeapons.Count > 0) ? allWeapons[currentSlot] : null;
     public int CurrentSlot => currentSlot;
     public bool CanQuickSwap => quickSwapTimer <= 0f;
+
+    private int lastSlot = -1; 
 
     private void Awake()
     {
@@ -98,6 +100,8 @@ public class WeaponManager : MonoBehaviour
             return;
         }
 
+        lastSlot = currentSlot; 
+
         SetActiveWeapon(slot);
         Debug.Log($"[WeaponManager] Switched to {targetWeapon.data.weaponName}");
     }
@@ -109,6 +113,7 @@ public class WeaponManager : MonoBehaviour
         {
             allWeapons[currentSlot].gameObject.SetActive(false);
         }
+
 
         currentSlot = slot;
         var newWeapon = allWeapons[currentSlot];
@@ -126,40 +131,29 @@ public class WeaponManager : MonoBehaviour
     }
 
 
-
     public void QuickSwap()
     {
-        if (!CanQuickSwap)
+        if (!CanQuickSwap) return;
+
+        // Если мы еще ни разу не переключались (lastSlot == -1), 
+        // или если текущее оружие и последнее — это одно и то же, ничего не делаем.
+        if (lastSlot == -1 || lastSlot == currentSlot)
         {
-            Debug.Log("[WeaponManager] Quick swap on cooldown.");
             return;
         }
 
-        int prevSlot = FindPreviousWeaponSlot();
-        if (prevSlot != -1 && prevSlot != currentSlot)
-        {
-            SwitchWeapon(prevSlot);
-            quickSwapTimer = quickSwapCooldown;
-        }
+        // Логика: Переключаемся на тот слот, который был до этого
+        int slotToSwitchTo = lastSlot;
+
+        // Важно: Мы используем SwitchWeapon, чтобы обновить и currentSlot, и lastSlot
+        SwitchWeapon(slotToSwitchTo);
+        
+        quickSwapTimer = quickSwapCooldown;
     }
 
-    private int FindPreviousWeaponSlot()
-    {
-        // Search backward from the current slot
-        for (int i = currentSlot - 1; i >= 0; i--)
-        {
-            if (allWeapons[i] != null && allWeapons[i].data.isAchieved)
-                return i;
-        }
-        // Wrap around to the end of the list
-        for (int i = allWeapons.Count - 1; i > currentSlot; i--)
-        {
-            if (allWeapons[i] != null && allWeapons[i].data.isAchieved)
-                return i;
-        }
-        return -1;
-    }
-
+    // Этот метод больше не нужен в старом виде, так как логика теперь в lastSlot
+    // Но если вы хотите использовать его для обычного перебора (1-2-3), 
+    // убедитесь, что SwitchWeapon вызывается корректно.
     private void Update()
     {
         if (quickSwapTimer > 0f)

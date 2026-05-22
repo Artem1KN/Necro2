@@ -3,9 +3,11 @@
 # Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
 #
 # Custom
+/.lscache/
 /[Aa]ssets/.kilo/
 /.vscode/
 /.[Kk]ilo/
+/[Aa]ssets/YughuesFreeConcreteMaterials/
 # 
 .utmp/
 /[Ll]ibrary/

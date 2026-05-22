@@ -54,7 +54,7 @@ public class PlayerMotor : MonoBehaviour
     private const float FrictionExponentFactor = 0.3f; // Коэффициент для экспоненты (чем больше — тем резче торможение при высокой скорости)
     private float _frictionMultiplier;
 
-    private bool isIceLocation = false;
+    private bool isSlide = false;
 
     void Start()
     {
@@ -83,7 +83,6 @@ public class PlayerMotor : MonoBehaviour
 
     public void OnJump(InputValue val)
     {
-        Debug.Log("Test - jump");
         if (val.isPressed)
         {
             _jumpRequestedThisFrame = true;
@@ -103,6 +102,14 @@ public class PlayerMotor : MonoBehaviour
         if (val.isPressed && weaponManager != null)
         {
             weaponManager.SwitchWeapon(1);
+        }
+    }
+
+    public void On_3(InputValue val)
+    {
+        if (val.isPressed && weaponManager != null)
+        {
+            weaponManager.SwitchWeapon(2);
         }
     }
 
@@ -238,38 +245,33 @@ public class PlayerMotor : MonoBehaviour
             wallJumpImpulse = wallRunHandler.WallNormal * wallRunHandler.WallJumpForce;
         }
 
-        // === ЛОГИКА ИНЕРЦИИ В ЗАВИСИМОСТИ ОТ ПОВЕРХНОСТИ ===
-        if (isIceLocation)
+        // ЛОГИКА ИНЕРЦИИ
+        if (isSlide)
         {
             // Старая реализация: линейное замедление через deceleration
-            // (не изменена — как в оригинале)
             currentSpeed = Mathf.MoveTowards(currentSpeed, 0f, deceleration * Time.deltaTime);
-            
             // Применяем движение
             _characterController.Move((horizontalMove + verticalMove + wallJumpImpulse) * Time.deltaTime);
         }
         else
         {
-            // Новая реализация: экспоненциальное затухание скорости
-            // Затухаем только если есть горизонтальная скорость (dash не входит в трение — он тушится отдельно)
+            // Экспоненциальное затухание скорости - только если есть горизонтальная скорость (dash не входит в трение, он тушится отдельно)
             if (totalHorizontalSpeed > 0.01f && _move.magnitude == 0f) // только если пользователь перестал вводить движение
             {
                 currentSpeed = ApplyNonLinearDecay(currentSpeed, Time.deltaTime);
             }
-
-            // Обработка затухания дэша — как и раньше (но можно усилить при не-леде)
+            // Обработка затухания dash - как и раньше
             if (_dashVelocity > 0.01f && _move.magnitude == 0f)
             {
                 _dashVelocity = Mathf.MoveTowards(_dashVelocity, 0f, 30f * Time.deltaTime);
             }
-
             // Применяем движение
             _characterController.Move((horizontalMove + verticalMove + wallJumpImpulse) * Time.deltaTime);
 
-            // Дополнительно: при высокой скорости — чуть резче тормозим (для динамики)
-            if (_move.magnitude == 0f && currentSpeed > 5f && !isIceLocation)
+            // При высокой скорости чуть резче тормозим
+            if (_move.magnitude == 0f && currentSpeed > 5f && !isSlide)
             {
-                // Небольшое "резкое" затухание, если скорость высока и ввод отсутствует
+                // Резкое затухание если скорость высока и ввод отсутствует
                 currentSpeed *= 0.98f; 
             }
         }
