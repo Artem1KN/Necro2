@@ -52,10 +52,7 @@ public class AssaultRifleWeapon : WeaponBase
         // 🔥 Нагреваем оружие — ВСЕГДА при выстреле (не только при попадании!)
         ApplyHeat(data.heatPerShot);
 
-        if (playerMotor != null)
-        {
-            playerMotor.AddRecoil(data.recoilStrength, data.recoilDuration);
-        }
+        AddRecoilFromData();
 
         // ✨ Muzzle flash (опционально)
         if (muzzleFlashPrefab != null)

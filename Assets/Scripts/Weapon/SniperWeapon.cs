@@ -51,8 +51,7 @@ public class SniperWeapon : WeaponBase
         SpawnMuzzleFlash();
         FireBeam(origin, origin + direction * maxRange);
 
-        if (playerMotor != null)
-            playerMotor.AddRecoil(data.recoilStrength, data.recoilDuration);
+        AddRecoilFromData();
     }
 
     protected override void ExecuteSkill()

@@ -90,13 +90,19 @@ public class RocketProjectile : MonoBehaviour
 
     private void ApplyRocketJump(Transform playerTransform)
     {
-        if (!playerTransform.TryGetComponent<PlayerMotor>(out var motor))
-            motor = playerTransform.GetComponentInParent<PlayerMotor>();
-        if (motor == null) return;
-
         Vector3 direction = (playerTransform.position - transform.position).normalized;
         if (direction.sqrMagnitude < 0.001f) direction = Vector3.up;
-        motor.ApplyExternalImpulse(direction * playerImpulse);
+        Vector3 impulse = direction * playerImpulse;
+
+        var motor = playerTransform.GetComponent<PlayerMotor>() ?? playerTransform.GetComponentInParent<PlayerMotor>();
+        if (motor != null)
+        {
+            motor.ApplyExternalImpulse(impulse);
+            return;
+        }
+
+        var test = playerTransform.GetComponent<TestPlayerController>() ?? playerTransform.GetComponentInParent<TestPlayerController>();
+        if (test != null) test.ApplyExternalImpulse(impulse);
     }
 
     private void SpawnExplosionEffect()

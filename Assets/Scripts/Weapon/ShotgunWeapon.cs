@@ -27,8 +27,7 @@ public class ShotgunWeapon : WeaponBase
         ApplyHeat(data.heatPerShot);
         SpawnMuzzleFlash();
 
-        if (playerMotor != null)
-            playerMotor.AddRecoil(data.recoilStrength, data.recoilDuration);
+        AddRecoilFromData();
     }
 
     protected override void ExecuteSkill()

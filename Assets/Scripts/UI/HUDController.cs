@@ -9,6 +9,14 @@ public class HUDController : MonoBehaviour
     [SerializeField] private PlayerHealth playerHealth;
     [SerializeField] private WeaponManager weaponManager;
     [SerializeField] private PlayerMotor playerMotor;
+    [SerializeField] private TestPlayerController testPlayer;
+
+    private float GetPlayerSpeed()
+    {
+        if (playerMotor != null) return playerMotor.currentSpeed;
+        if (testPlayer != null) return testPlayer.currentSpeed;
+        return 0f;
+    }
 
     [Header("Vitality")]
     [SerializeField] private Image hpFill;
@@ -124,10 +132,9 @@ public class HUDController : MonoBehaviour
 
     private void UpdateSpeed()
     {
-        if (playerMotor == null) return;
-
-        float pct = maxSpeedForGauge > 0f ? Mathf.Clamp01(playerMotor.currentSpeed / maxSpeedForGauge) : 0f;
+        float speed = GetPlayerSpeed();
+        float pct = maxSpeedForGauge > 0f ? Mathf.Clamp01(speed / maxSpeedForGauge) : 0f;
         if (speedGaugeFill != null) speedGaugeFill.fillAmount = pct;
-        if (speedText != null) speedText.text = $"{Mathf.RoundToInt(playerMotor.currentSpeed)}";
+        if (speedText != null) speedText.text = $"{Mathf.RoundToInt(speed)}";
     }
 }

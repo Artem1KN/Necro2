@@ -1,16 +1,17 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 /// Minimal first-person controller for demo testing.
 /// Plays the role of PlayerMotor for WeaponManager and HUDController:
 /// exposes activeWeapon, currentSpeed, AddRecoil, ApplyExternalImpulse.
-/// Use this when the full PlayerMotor rig is not yet wired up.
+/// Uses the new Input System (Keyboard.current, Mouse.current).
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(PlayerHealth))]
 public class TestPlayerController : MonoBehaviour
 {
     [Header("Movement")]
     public float moveSpeed = 7f;
-    public float lookSensitivity = 2.5f;
+    public float lookSensitivity = 0.15f;
     public float jumpHeight = 1.8f;
     public float gravity = -19.62f;
 
@@ -62,26 +63,36 @@ public class TestPlayerController : MonoBehaviour
 
     private void HandleLook()
     {
-        float mx = Input.GetAxis("Mouse X") * lookSensitivity;
-        float my = Input.GetAxis("Mouse Y") * lookSensitivity;
+        var mouse = Mouse.current;
+        if (mouse == null) return;
 
-        transform.Rotate(0f, mx, 0f);
+        Vector2 delta = mouse.delta.ReadValue() * lookSensitivity;
 
-        pitch = Mathf.Clamp(pitch - my, -85f, 85f);
+        transform.Rotate(0f, delta.x, 0f);
+
+        pitch = Mathf.Clamp(pitch - delta.y, -85f, 85f);
         if (cameraHolder != null)
             cameraHolder.localRotation = Quaternion.Euler(pitch, 0f, 0f);
     }
 
     private void HandleMove()
     {
-        float h = Input.GetAxis("Horizontal");
-        float v = Input.GetAxis("Vertical");
+        var kb = Keyboard.current;
+        float h = 0f, v = 0f;
+        if (kb != null)
+        {
+            if (kb.aKey.isPressed) h -= 1f;
+            if (kb.dKey.isPressed) h += 1f;
+            if (kb.sKey.isPressed) v -= 1f;
+            if (kb.wKey.isPressed) v += 1f;
+        }
+
         Vector3 wish = (transform.right * h + transform.forward * v).normalized;
 
         if (cc.isGrounded)
         {
             if (verticalVelocity.y < 0f) verticalVelocity.y = -2f;
-            if (Input.GetKeyDown(KeyCode.Space))
+            if (kb != null && kb.spaceKey.wasPressedThisFrame)
                 verticalVelocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
         }
 
@@ -101,13 +112,16 @@ public class TestPlayerController : MonoBehaviour
     {
         if (weaponManager == null) return;
 
-        if (Input.GetKeyDown(KeyCode.Alpha1)) weaponManager.SwitchWeapon(0);
-        if (Input.GetKeyDown(KeyCode.Alpha2)) weaponManager.SwitchWeapon(1);
-        if (Input.GetKeyDown(KeyCode.Alpha3)) weaponManager.SwitchWeapon(2);
-        if (Input.GetKeyDown(KeyCode.Alpha4)) weaponManager.SwitchWeapon(3);
-        if (Input.GetKeyDown(KeyCode.Alpha5)) weaponManager.SwitchWeapon(4);
-        if (Input.GetKeyDown(KeyCode.Alpha6)) weaponManager.SwitchWeapon(5);
-        if (Input.GetKeyDown(KeyCode.Q)) weaponManager.QuickSwap();
+        var kb = Keyboard.current;
+        if (kb == null) return;
+
+        if (kb.digit1Key.wasPressedThisFrame) weaponManager.SwitchWeapon(0);
+        if (kb.digit2Key.wasPressedThisFrame) weaponManager.SwitchWeapon(1);
+        if (kb.digit3Key.wasPressedThisFrame) weaponManager.SwitchWeapon(2);
+        if (kb.digit4Key.wasPressedThisFrame) weaponManager.SwitchWeapon(3);
+        if (kb.digit5Key.wasPressedThisFrame) weaponManager.SwitchWeapon(4);
+        if (kb.digit6Key.wasPressedThisFrame) weaponManager.SwitchWeapon(5);
+        if (kb.qKey.wasPressedThisFrame) weaponManager.QuickSwap();
 
         activeWeapon = weaponManager.ActiveWeapon;
     }
@@ -116,8 +130,11 @@ public class TestPlayerController : MonoBehaviour
     {
         if (activeWeapon == null) return;
 
-        bool attack = Input.GetMouseButton(0);
-        bool skill = Input.GetMouseButton(1);
+        var mouse = Mouse.current;
+        if (mouse == null) return;
+
+        bool attack = mouse.leftButton.isPressed;
+        bool skill = mouse.rightButton.isPressed;
         activeWeapon.HandleContinuousInput(attack, skill);
     }
 }
