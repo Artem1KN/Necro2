@@ -16,6 +16,7 @@ public class WeaponManager : MonoBehaviour
     public WeaponBase ActiveWeapon => (allWeapons != null && allWeapons.Count > 0) ? allWeapons[currentSlot] : null;
     public int CurrentSlot => currentSlot;
     public bool CanQuickSwap => quickSwapTimer <= 0f;
+    public IReadOnlyList<WeaponBase> AllWeapons => allWeapons;
 
     private int lastSlot = -1; 
 
