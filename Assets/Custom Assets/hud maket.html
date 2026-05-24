@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NECRO 2 - HUD Interface</title>
+    <style>
+        :root {
+            --neon-cyan: #00ffff;
+            --acid-green: #39ff14;
+            --warning-red: #ff3131;
+            --warning-orange: #ffae00;
+            --bg-dark: rgba(10, 15, 10, 0.85);
+            --border-heavy: 3px solid #222;
+            --font-main: 'Courier New', Courier, monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+        }
+
+        body {
+            background-color: #1a1a1a; /* Placeholder for game world */
+            background-image: 
+                radial-gradient(circle, #333 1px, transparent 1px),
+                linear-gradient(#222 1px, transparent 1px);
+            background-size: 40px 40px;
+            font-family: var(--font-main);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* --- CRT & SCANLINE OVERLAY --- */
+        .crt-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+            background: linear-gradient(
+                rgba(18, 16, 16, 0) 50%, 
+                rgba(0, 0, 0, 0.2) 50%
+            ), 
+            linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 4px, 3px 100%;
+        }
+
+        .crt-flicker {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(18, 16, 16, 0.05);
+            opacity: 0;
+            pointer-events: none;
+            animation: flicker 0.15s infinite;
+            z-index: 99;
+        }
+
+        @keyframes flicker {
+            0% { opacity: 0.1; }
+            50% { opacity: 0.02; }
+            100% { opacity: 0.08; }
+        }
+
+        /* --- HUD CONTAINER --- */
+        #hud-root {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            pointer-events: none;
+        }
+
+        /* --- BOTTOM LEFT: VITALITY --- */
+        .vitality-monitor {
+            position: absolute;
+            bottom: 40px;
+            left: 40px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            pointer-events: auto;
+        }
+
+        .hp-bar-container {
+            width: 250px;
+            height: 30px;
+            background: #111;
+            border: var(--border-heavy);
+            padding: 3px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .hp-bar-fill {
+            height: 100%;
+            width: 85%; /* Dynamic */
+            background: linear-gradient(90deg, var(--warning-red), var(--acid-green));
+            transition: width 0.3s ease;
+        }
+
+        .hp-text {
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-shadow: 2px 2px #000;
+        }
+
+        /* --- BOTTOM CENTER: ARSENAL --- */
+        .arsenal-hotbar {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            background: var(--bg-dark);
+            padding: 10px;
+            border: var(--border-heavy);
+            pointer-events: auto;
+        }
+
+        .weapon-slot {
+            width: 60px;
+            height: 70px;
+            border: 2px solid #444;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 5px;
+            position: relative;
+            background: rgba(0,0,0,0.5);
+            transition: all 0.1s;
+        }
+
+        .weapon-slot.active {
+            border-color: var(--neon-cyan);
+            box-shadow: 0 0 15px var(--neon-cyan);
+            transform: scale(1.1);
+            z-index: 2;
+        }
+
+        .weapon-slot.locked {
+            opacity: 0.5;
+            filter: grayscale(1);
+        }
+
+        .weapon-slot .index {
+            position: absolute;
+            top: 2px;
+            left: 4px;
+            font-size: 0.7rem;
+            color: #888;
+        }
+
+        .weapon-icon {
+            font-size: 2rem;
+            margin-top: 10px;
+        }
+
+        .heat-mini-bar {
+            width: 100%;
+            height: 6px;
+            background: #111;
+            border: 1px solid #333;
+        }
+
+        .heat-mini-fill {
+            height: 100%;
+            width: 20%;
+            background: var(--acid-green);
+        }
+
+        .danger-flag {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 0; height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 12px solid var(--warning-red);
+            display: none;
+            animation: pulse 0.4s infinite;
+        }
+
+        .weapon-slot.danger .danger-flag {
+            display: block;
+        }
+
+        .lock-overlay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.6);
+            font-size: 1.5rem;
+        }
+
+        /* --- BOTTOM RIGHT: THERMAL & MOTION --- */
+        .thermal-monitor {
+            position: absolute;
+            bottom: 40px;
+            right: 40px;
+            width: 300px;
+            background: var(--bg-dark);
+            border: var(--border-heavy);
+            padding: 15px;
+            pointer-events: auto;
+        }
+
+        .speedometer-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        /* CSS Circular Gauge */
+        .gauge-wrapper {
+            width: 50px;
+            height: 50px;
+            position: relative;
+            border-radius: 50%;
+            background: conic-gradient(var(--acid-green) 70%, #222 70%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .gauge-inner {
+            width: 35px;
+            height: 35px;
+            background: #111;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
+            color: white;
+        }
+
+        .thermal-label {
+            font-size: 0.8rem;
+            color: #aaa;
+            text-transform: uppercase;
+        }
+
+        .heat-main-bar {
+            width: 100%;
+            height: 20px;
+            background: #111;
+            border: 1px solid #444;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* The "Damage Bonus Zone" is a static gradient background */
+        .heat-main-bar::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 70%; width: 30%; height: 100%;
+            background: linear-gradient(90deg, transparent, var(--warning-orange));
+        }
+
+        .heat-main-fill {
+            height: 100%;
+            width: 45%; /* Dynamic */
+            background: var(--acid-green);
+            transition: width 0.2s ease;
+        }
+
+        .dmg-bonus-text {
+            margin-top: 8px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: #555;
+            text-align: right;
+        }
+
+        .dmg-bonus-text.active {
+            color: var(--neon-cyan);
+            text-shadow: 0 0 8px var(--neon-cyan);
+        }
+
+        /* --- ANIMATIONS --- */
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        @keyframes glitch-text {
+            0% { transform: translate(0); }
+            20% { transform: clear(2px, -1px); }
+            40% { transform: translate(-1px, 1px); }
+            60% { transform: translate(1px, -1px); }
+            80% { transform: translate(-1px, 0); }
+            100% { transform: translate(0); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="crt-overlay"></div>
+    <div class="crt-flicker"></div>
+
+    <div id="hud-root">
+        <!-- BOTTOM LEFT -->
+        <div class="vitality-monitor">
+            <div class="hp-bar-container">
+                <div class="hp-bar-fill" id="hp-fill"></div>
+            </div>
+            <div class="hp-text" id="hp-text">HP: 085/100</div>
+        </div>
+
+        <!-- BOTTOM CENTER -->
+        <div class="arsenal-hotbar" id="arsenal">
+            <!-- Slots generated by JS -->
+        </div>
+
+        <!-- BOTTOM RIGHT -->
+        <div class="thermal-monitor">
+            <div class="speedometer-container">
+                <div class="gauge-wrapper" id="speed-gauge">
+                    <div class="gauge-inner">SPD</div>
+                </div>
+                <div class="thermal-label">Cooling Velocity</div>
+            </div>
+
+            <div class="thermal-label" style="margin-bottom: 5px;">Weapon Heat</div>
+            <div class="heat-main-bar">
+                <div class="heat-main-fill" id="main-heat-fill"></div>
+            </div>
+            
+            <div class="dmg-bonus-text" id="dmg-bonus-status">
+                DMG BONUS: OFF
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- GAME DATA ---
+        const weapons = [
+            { id: 1, icon: '🔫', heat: 20, locked: false, active: true },
+            { id: 2, icon: '🚀', heat: 45, locked: false, active: false },
+            { id: 3, icon: '🔥', heat: 85, locked: false, active: false, danger: true },
+            { id: 4, icon: '🔒', heat: 0,  locked: true,  active: false },
+            { id: 5, icon: '🔒', heat: 0,  locked: true,  active: false },
+            { id: 6, icon: '⚡', heat: 10, locked: false, active: false },
+            { id: 7, icon: '💀', heat: 95, locked: false, active: false, danger: true }
+        ];
+
+        const arsenalEl = document.getElementById('arsenal');
+        const hpFill = document.getElementById('hp-fill');
+        const hpText = document.getElementById('hp-text');
+        const mainHeatFill = document.getElementById('main-heat-fill');
+        const dmgBonusText = document.getElementById('dmg-bonus-status');
+        const speedGauge = document.getElementById('speed-gauge');
+
+        // --- RENDER HUD ---
+        function initHUD() {
+            arsenalEl.innerHTML = '';
+            weapons.forEach((w, index) => {
+                const slot = document.createElement('div');
+                slot.className = `weapon-slot ${w.active ? 'active' : ''} ${w.locked ? 'locked' : ''} ${w.danger ? 'danger' : ''}`;
+                slot.onclick = () => selectWeapon(index);
+
+                let content = `
+                    <span class="index">${w.id}</span>
+                    <div class="weapon-icon">${w.locked ? '?' : w.icon}</div>
+                    <div class="heat-mini-bar">
+                        <div class="heat-mini-fill" style="width: ${w.heat}%"></div>
+                    </div>
+                `;
+
+                if (w.locked) {
+                    content += `<div class="lock-overlay">🔒</div>`;
+                }
+
+                if (w.danger) {
+                    content += `<div class="danger-flag"></div>`;
+                }
+
+                slot.innerHTML = content;
+                arsenalEl.appendChild(slot);
+            });
+            updateThermalMonitor();
+        }
+
+        function selectWeapon(index) {
+            const weapon = weapons[index];
+            if (weapon.locked) return;
+
+            // Update logical state
+            weapons.forEach((w, i) => {
+                w.active = (i === index);
+            });
+
+            // Refresh UI
+            initHUD();
+        }
+
+        function updateThermalMonitor() {
+            const activeWeapon = weapons.find(w => w.active);
+            if (!activeWeapon) return;
+
+            // Update Main Heat Bar
+            mainHeatFill.style.width = `${activeWeapon.heat}%`;
+
+            // Update Damage Bonus Text (Logic: if heat > 70%)
+            if (activeWeapon.heat >= 70) {
+                dmgBonusText.innerText = "DMG BONUS: ON";
+                dmgBonusText.classList.add('active');
+            } else {
+                dmgBonusText.innerText = "DMG BONUS: OFF";
+                dmgBonusText.classList.remove('active');
+            }
+
+            // Update Speedometer (Simulate dynamic cooling based on heat)
+            const speedVal = activeWeapon.heat < 30 ? 90 : 40;
+            speedGauge.style.background = `conic-gradient(var(--acid-green) ${speedVal}%, #222 ${speedVal}%)`;
+        }
+
+        // Initial Run
+        initHUD();
+
+        // Simulate random health/heat changes for "Live" feel
+        setInterval(() => {
+            const randomHeat = Math.floor(Math.random() * 100);
+            const activeIdx = weapons.findIndex(w => w.active);
+            if (weapons[activeIdx].locked) return;
+
+            // Randomly fluctuate heat of the active weapon for visual effect
+            weapons[activeIdx].heat = Math.min(100, Math.max(10, randomHeat));
+            
+            // Check if danger flag needs to appear/disappear on active slot
+            weapons[activeIdx].danger = weapons[activeIdx].heat > 80;
+
+            initHUD();
+        }, 2000);
+
+    </script>
+</body>
+</html>
