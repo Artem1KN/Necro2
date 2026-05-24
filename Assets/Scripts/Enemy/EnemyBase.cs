@@ -1,17 +1,21 @@
 using UnityEngine;
 using System;
 
-/// <summary>
-/// Базовый класс для врагов. Реализует IDamagable.
-/// </summary>
 [RequireComponent(typeof(Collider))]
 public class EnemyBase : MonoBehaviour, IDamagable
 {
     [Header("Health Settings")]
     public float maxHP = 50f;
-    
+
+    [Header("Loot")]
+    [Tooltip("Energy orb prefab spawned on death. Must contain EnergyOrb component.")]
+    public GameObject energyOrbPrefab;
+
+    [Tooltip("Orb config applied to the spawned orb (heal value, size, scale).")]
+    public OrbData orbDropOnDeath;
+
     [Header("Events")]
-    public Action<float, float> onHealthChanged; // current, max
+    public Action<float, float> onHealthChanged;
     public Action onDeath;
 
     private float currentHP;
@@ -45,14 +49,26 @@ public class EnemyBase : MonoBehaviour, IDamagable
         return currentHP;
     }
 
-    /// <summary>
-    /// Смерть врага.
-    /// </summary>
     private void Die()
     {
+        SpawnEnergyOrb();
         onDeath?.Invoke();
-        
-        // Уничтожаем объект после смерти
         Destroy(gameObject);
+    }
+
+    private void SpawnEnergyOrb()
+    {
+        if (energyOrbPrefab == null || orbDropOnDeath == null) return;
+
+        var orbGo = Instantiate(energyOrbPrefab, transform.position, Quaternion.identity);
+        if (orbGo.TryGetComponent<EnergyOrb>(out var orb))
+        {
+            orb.orbData = orbDropOnDeath;
+        }
+
+        if (orbDropOnDeath.scaleMultiplier > 0f && Mathf.Abs(orbDropOnDeath.scaleMultiplier - 1f) > 0.001f)
+        {
+            orbGo.transform.localScale *= orbDropOnDeath.scaleMultiplier;
+        }
     }
 }

@@ -1,119 +1,122 @@
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
 
 public class SwordWeapon : WeaponBase
 {
-    [Header("Attack Settings")]
-    public LayerMask enemyLayers; // Слой для врагов
+    [Header("Melee Attack")]
+    public LayerMask enemyLayers;
     public float attackRange = 2f;
     public float attackRadius = 1f;
-    public Transform attackPoint; // Drag here in Inspector! 🎯
-    // Внутренняя логика нанесения урона (физика, триггеры и т.д.)
+    public Transform attackPoint;
 
+    [Header("Parry / Block")]
+    [Tooltip("Time window after RMB during which projectiles are deflected.")]
+    public float parryWindowSeconds = 0.25f;
 
-        // Этот метод вызывается из WeaponBase.HandleContinuousInput, когда таймер fireRate прошел и кнопка зажата.
+    [Tooltip("Radius around the player searched for projectiles during parry.")]
+    public float parryRadius = 3f;
+
+    [Tooltip("Damage multiplier applied to a deflected projectile.")]
+    public float deflectDamageMultiplier = 2f;
+
+    [Tooltip("Layers searched for deflectable projectiles. Set to your projectile layer.")]
+    public LayerMask deflectableLayers = ~0;
+
+    private float parryTimer;
+    private bool parrySucceededThisWindow;
+
+    public bool IsParryActive => parryTimer > 0f && !parrySucceededThisWindow;
+
     protected override void TryFire()
     {
-        // Нам НЕ НУЖНО проверять Time.time здесь, так как это уже сделал базовый класс.
-        // Нам НЕ НУЖНО проверять isOverheated здесь, так как это тоже сделал базовый класс.
-        Debug.Log("[Sword] Swing animation/logic triggered");
         PerformAttack(data.baseDamage);
     }
 
-    protected void PerformAttack(float damage)
+    private void PerformAttack(float damage)
     {
-        if (attackPoint == null) 
+        if (attackPoint == null)
         {
             Debug.LogError("[Sword] Attack point not assigned!", this);
             return;
         }
 
-        Collider[] hitColliders = Physics.OverlapSphere(attackPoint.position, attackRange, enemyLayers);
-        List<EnemyBase> enemiesHit = new List<EnemyBase>();
+        Collider[] hits = Physics.OverlapSphere(attackPoint.position, attackRange, enemyLayers);
+        var enemiesHit = new HashSet<EnemyBase>();
 
-        foreach (var collider in hitColliders)
+        foreach (var hit in hits)
         {
-            EnemyBase enemy = collider.GetComponent<EnemyBase>();
-            if (enemy != null && !enemiesHit.Contains(enemy))
-            {
+            if (hit.TryGetComponent<EnemyBase>(out var enemy) && enemiesHit.Add(enemy))
                 enemy.TakeDamage(damage);
-                enemiesHit.Add(enemy);
-                // Добавь визуальный эффект попадания или звук здесь — для подтверждения урона
-            }
         }
 
-        Debug.Log($"[Sword] Attack! Damage: {damage}, Enemies hit: {enemiesHit.Count}");
-
-        // 🔥 Применяем нагрев только если есть попадание и разрешено
         if (enemiesHit.Count > 0)
-        {
             ApplyHeat(data.heatPerShot);
-        }
     }
 
-    // Этот метод вызывается из WeaponBase.HandleContinuousInput при зажатой ПКМ
     protected override void ExecuteSkill()
     {
-        // В бумер-шутере блок — это состояние. 
-        // Если мы попали сюда, значит таймер fireRate прошел.
-        // Для меча "навык" (ПКМ) может быть либо мгновенным ударом, либо переключением режима в "Блок".
-        Debug.Log("[Sword] Skill/Block Active");
-        //Block_Enemy_Projectile();
+        parryTimer = parryWindowSeconds;
+        parrySucceededThisWindow = false;
     }
-    // Дополнительно: если вы хотите, чтобы блок ПРЕКРАЩАЛСЯ, когда отпускают кнопку, вам может понадобиться переопределить HandleContinuousInput или добавить логику в Update.
 
-/*
-    protected void Block_Enemy_Projectile()
+    private void Update()
     {
-        // Для меча "навык" — это блок/парирование.
-        // Если мы здесь — значит таймер skillCooldown прошёл и оружие не перегрето (проверено в WeaponBase).
-        
-        Debug.Log("[Sword] Skill/Block Active");
+        if (parryTimer <= 0f) return;
 
-        // Попытка парирования: проверяем, есть ли атакующий враг в радиусе блока
-        if (playerMotor == null) return;
+        parryTimer -= Time.deltaTime;
+        if (!parrySucceededThisWindow)
+            TryParryProjectiles();
+    }
 
-        // Примерный радиус блока — можно вынести в WeaponData
-        float blockRadius = 2f;
-        Collider[] hitColliders = Physics.OverlapSphere(playerMotor.transform.position, blockRadius, enemyLayers);
+    private void TryParryProjectiles()
+    {
+        var origin = playerMotor != null ? playerMotor.transform.position : transform.position;
+        var forward = GetAimForward();
 
-        bool wasBlocked = false;
-        foreach (var collider in hitColliders)
+        var hits = Physics.OverlapSphere(origin, parryRadius, deflectableLayers);
+        foreach (var hit in hits)
         {
-            EnemyBase enemy = collider.GetComponent<EnemyBase>();
-            if (enemy != null && !wasBlocked)
+            if (!hit.TryGetComponent<IDeflectable>(out var deflectable))
             {
-                // Проверяем направление атаки — для простоты считаем, что парирование срабатывает при близости
-                // В реальном проекте можно добавить проверку угла между вектором взгляда игрока и направлением к врагу.
-                
-                // Если враг атакует (можно добавить флаг isAttacking), то блокируем
-                if (enemy.TryBlockAttack())
-                {
-                    wasBlocked = true;
-                    break;
-                }
+                deflectable = hit.GetComponentInParent<IDeflectable>();
+                if (deflectable == null) continue;
             }
-        }
 
-        if (wasBlocked)
-        {
-            Debug.Log("[Sword] Block successful!");
-            
-            // Нагрев при успешном парировании, если настроено
-            if (data.skillUsesHeat && !isOverheated)
+            var ownerTransform = playerMotor != null ? playerMotor.transform : transform;
+            if (deflectable.TryDeflect(forward, ownerTransform, deflectDamageMultiplier))
             {
-                ApplyHeat(data.heatPerSkill);
+                parrySucceededThisWindow = true;
+                if (data.skillUsesHeat && !isOverheated)
+                    ApplyHeat(data.heatPerSkill);
+                break;
             }
         }
     }
-*/
 
-    /// <summary>
-    /// Вспомогательный метод для применения тепла (вынесен из WeaponBase, чтобы не дублировать логику).
-    /// </summary>
+    private Vector3 GetAimForward()
+    {
+        var cam = Camera.main;
+        if (cam != null) return cam.transform.forward;
+        if (playerMotor != null) return playerMotor.transform.forward;
+        return transform.forward;
+    }
+
     private void ApplyHeat(float amount)
     {
-        currentHeat += amount;
-        currentHeat = Mathf.Clamp(currentHeat, 0, data.overheatThreshold);
+        currentHeat = Mathf.Clamp(currentHeat + amount, 0f, data.overheatThreshold);
+        if (!isOverheated && currentHeat >= data.overheatThreshold)
+            isOverheated = true;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (attackPoint != null)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(attackPoint.position, attackRange);
+        }
+
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, parryRadius);
     }
 }

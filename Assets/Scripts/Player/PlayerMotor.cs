@@ -26,6 +26,24 @@ public class PlayerMotor : MonoBehaviour
     [Header("Handlers")]
     [SerializeField] private WallRunHandler wallRunHandler;
     [SerializeField] private CameraEffectsHandler cameraEffectsHandler;
+    [SerializeField] private RecoilController recoilController;
+
+    public void AddRecoil(float strength, float duration)
+    {
+        if (recoilController != null) recoilController.AddKick(strength, duration);
+    }
+
+    public void ApplyExternalImpulse(Vector3 impulse)
+    {
+        _verticalVelocity += impulse.y;
+
+        Vector3 horizontal = new(impulse.x, 0f, impulse.z);
+        if (horizontal.sqrMagnitude > 0.001f)
+        {
+            _lastMoveDirection = horizontal.normalized;
+            _dashVelocity += horizontal.magnitude;
+        }
+    }
 
     [Header("References")]
     [SerializeField] private CharacterController _characterController;
