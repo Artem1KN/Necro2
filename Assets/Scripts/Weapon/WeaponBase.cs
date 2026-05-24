@@ -15,9 +15,14 @@ public abstract class WeaponBase : MonoBehaviour
     // Флаги состояния, которые мы будем получать из Motor
     private bool _isAttackHeld;
     private bool _isSkillHeld;
-    protected virtual void Update()
+
+    /// <summary>
+    /// Основной метод обновления состояния оружия. 
+    /// Вызывается WeaponManager'ом каждый кадр для ВСЕХ пушек в списке.
+    /// </summary>
+    public void Tick(float deltaTime, bool isCurrentlyActive, float playerSpeed)
     {
-        HandlePassiveCooling();
+        HandlePassiveCooling(deltaTime, isCurrentlyActive, playerSpeed);
     }
 
      /// <summary>
@@ -49,24 +54,31 @@ public abstract class WeaponBase : MonoBehaviour
         }
     }
 
-    private void HandlePassiveCooling()
+    private void HandlePassiveCooling(float deltaTime, bool isCurrentlyActive, float playerSpeed)
     {
         if (currentHeat <= 0) return;
 
         // Логика: охлаждение зависит от скорости игрока
-        float speedFactor = (playerMotor != null) ? Mathf.Max(1f, playerMotor.currentSpeed) : 1f;
+        float speedFactor = Mathf.Max(1f, playerSpeed);
         
-        // Охлаждение за секунду (passiveCoolingRate в WeaponData - это единицы охлаждения в секунду)
+        // Базовая скорость остывания
         float coolingPerSecond = data.passiveCoolingRate * speedFactor;
-        float cooling = coolingPerSecond * Time.deltaTime;
 
+        // Если оружие активно (в руках), можно применить бонус к охлаждению, если он есть в логике
+        if (isCurrentlyActive)
+        {
+            // Если вы захотите использовать activeCoolingBonus из WeaponData:
+            // coolingPerSecond *= data.activeCoolingBonus; 
+        }
+
+        float cooling = coolingPerSecond * deltaTime;
         currentHeat -= cooling;
         currentHeat = Mathf.Clamp(currentHeat, 0, data.overheatThreshold);
 
         if (isOverheated && currentHeat <= data.recoveryThreshold)
         {
             isOverheated = false;
-            // Здесь можно вызвать ивент для UI: "Оружие готово"
+            // Event: Weapon Ready
         }
     }
 

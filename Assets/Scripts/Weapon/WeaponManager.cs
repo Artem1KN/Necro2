@@ -11,10 +11,6 @@ public class WeaponManager : MonoBehaviour
 
     [Header("References")]
     [SerializeField] private PlayerMotor playerMotor;
-
-    //private InputAction _weapon1Action;
-    //private InputAction _weapon2Action;
-    //private InputAction _quickSwapAction;
     private float quickSwapTimer = 0f;
 
     public WeaponBase ActiveWeapon => (allWeapons != null && allWeapons.Count > 0) ? allWeapons[currentSlot] : null;
@@ -25,7 +21,6 @@ public class WeaponManager : MonoBehaviour
 
     private void Awake()
     {
-        // Auto-assign PlayerMotor if not set
         if (playerMotor == null)
         {
             playerMotor = GetComponent<PlayerMotor>();
@@ -56,15 +51,6 @@ public class WeaponManager : MonoBehaviour
             Debug.LogError("[WeaponManager] PlayerInput component not found on PlayerMotor!");
             return;
         }
-/*
-        _weapon1Action = playerInput.actions.FindAction("1");
-        _weapon2Action = playerInput.actions.FindAction("2");
-        _quickSwapAction = playerInput.actions.FindAction("QuickSwap");
-
-        if (_weapon1Action != null) _weapon1Action.performed += OnWeapon1;
-        if (_weapon2Action != null) _weapon2Action.performed += OnWeapon2;
-        if (_quickSwapAction != null) _quickSwapAction.performed += QuickSwap;
-        */
     }
 
     private void InitializeWeapons()
@@ -130,33 +116,44 @@ public class WeaponManager : MonoBehaviour
         return ActiveWeapon;
     }
 
-
     public void QuickSwap()
     {
         if (!CanQuickSwap) return;
-
-        // Если мы еще ни разу не переключались (lastSlot == -1), 
-        // или если текущее оружие и последнее — это одно и то же, ничего не делаем.
-        if (lastSlot == -1 || lastSlot == currentSlot)
-        {
-            return;
-        }
-
+        // Если мы еще ни разу не переключались (lastSlot == -1), или если текущее оружие и последнее — это одно и то же, ничего не делаем.
+        if (lastSlot == -1 || lastSlot == currentSlot)  return;
         // Логика: Переключаемся на тот слот, который был до этого
         int slotToSwitchTo = lastSlot;
-
         // Важно: Мы используем SwitchWeapon, чтобы обновить и currentSlot, и lastSlot
         SwitchWeapon(slotToSwitchTo);
-        
         quickSwapTimer = quickSwapCooldown;
     }
 
-    // Этот метод больше не нужен в старом виде, так как логика теперь в lastSlot
-    // Но если вы хотите использовать его для обычного перебора (1-2-3), 
-    // убедитесь, что SwitchWeapon вызывается корректно.
     private void Update()
     {
         if (quickSwapTimer > 0f)
             quickSwapTimer -= Time.deltaTime;
+
+        // НОВАЯ ЛОГИКА: Обновление нагрева для всех пушек
+        UpdateAllWeaponsHeat();
     }
+
+    private void UpdateAllWeaponsHeat()
+{
+    if (allWeapons == null || playerMotor == null) return;
+
+    float currentSpeed = playerMotor.currentSpeed; // Предполагаю, что это свойство есть в PlayerMotor
+
+    foreach (var weapon in allWeapons)
+    {
+        if (weapon != null)
+        {
+            // Проверяем, является ли эта пушка текущей активной
+            bool isActive = (weapon == ActiveWeapon);
+            
+            // Вызываем Tick. Даже если gameObject деактивирован, 
+            // ссылка на скрипт в списке allWeapons жива, и метод выполнится.
+            weapon.Tick(Time.deltaTime, isActive, currentSpeed);
+        }
+    }
+}
 }

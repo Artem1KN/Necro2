@@ -56,7 +56,7 @@ public class SphereProjectile : MonoBehaviour
         // Проверяем, попал ли обратно в стрелявшего (после отражения)
         if (isReflected && shooterTransform != null && other.gameObject == shooterTransform.gameObject)
         {
-            var shooterDamagable = other.GetComponentInParent<EnemyBase>();
+            var shooterDamagable = other.GetComponentInParent<IDamagable>();
             if (shooterDamagable != null)
             {
                 shooterDamagable.TakeDamage(damage);
