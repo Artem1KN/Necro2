@@ -30,6 +30,7 @@ public abstract class WeaponBase : MonoBehaviour
     /// </summary>
     public void Tick(float deltaTime, bool isCurrentlyActive, float playerSpeed)
     {
+        if (data == null) return;
         HandlePassiveCooling(deltaTime, isCurrentlyActive, playerSpeed);
     }
 
@@ -38,21 +39,21 @@ public abstract class WeaponBase : MonoBehaviour
     /// </summary>
     public void HandleContinuousInput(bool isAttackPressed, bool isSkillPressed)
     {
+        if (data == null) return;
+
         _isAttackHeld = isAttackPressed;
         _isSkillHeld = isSkillPressed;
 
-        // 🔫 ЛКМ: автоматический огонь (для всех оружий)
         if (_isAttackHeld && !isOverheated)
         {
             if (Time.time >= lastFireTime + data.fireRate)
             {
-                TryFire();  // ⚠️ внутри TryFire() мы вызываем Heat.ApplyHeat() — но для меча это будет только при hit!
+                TryFire();
                 lastFireTime = Time.time;
             }
         }
 
-        // 🛡️ ПКМ / Skill: такая же логика
-        if (_isSkillHeld && !isOverheated) //Если навык имеет cd/heat — проверяем cooldown
+        if (_isSkillHeld && !isOverheated)
         {
             if (Time.time >= lastSkillTime + data.skillCooldown)
             {

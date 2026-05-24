@@ -354,7 +354,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5dc6eb4e7cf04cb3bfb7cf722402f61, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RoomCombat
-  data: {fileID: 0}
+  data: {fileID: 11400000, guid: d926df4e40a9d47d8a99fd8108e12b22, type: 2}
   spawnPoints:
   - {fileID: 143365367}
   - {fileID: 604003592}

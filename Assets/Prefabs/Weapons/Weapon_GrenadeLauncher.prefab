@@ -157,7 +157,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: df7ec000b8a254644be07f0db1945fb1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GrenadeLauncherWeapon
-  data: {fileID: 0}
+  data: {fileID: 11400000, guid: 9701bed9bf7a64e39b96d94ab0f1e755, type: 2}
   currentHeat: 0
   isOverheated: 0
   playerMotor: {fileID: 0}

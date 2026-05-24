@@ -125,7 +125,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3ba89d6483f24f11bdb6caf3032f75f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SniperWeapon
-  data: {fileID: 0}
+  data: {fileID: 11400000, guid: c012fe03061cc44afba2176402dec688, type: 2}
   currentHeat: 0
   isOverheated: 0
   playerMotor: {fileID: 0}
