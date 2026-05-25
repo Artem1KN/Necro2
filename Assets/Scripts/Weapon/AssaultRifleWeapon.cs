@@ -7,8 +7,8 @@ public class AssaultRifleWeapon : WeaponBase
     public LayerMask enemyLayers;              // Слой врагов
     public float maxRange = 10f;               // Дальность hitscan
     public float spreadAngle = 2f;             // Разброс направления выстрела (в градусах)
-    public GameObject muzzleFlashPrefab;       // Визуал выстрела (опционально)
-    public ParticleSystem hitEffect;           // Эффект при попадании в цель
+    public GameObject muzzleFlashPrefab;
+    public GameObject hitEffectPrefab;
 
     protected override void TryFire()
     {
@@ -37,12 +37,10 @@ public class AssaultRifleWeapon : WeaponBase
 
                 Debug.Log($"[Gun] Attack! Damage: {damage}");
 
-                // 🎯 Визуальный эффект попадания
-                if (hitEffect != null)
+                if (hitEffectPrefab != null)
                 {
-                    ParticleSystem instance = Instantiate(hitEffect, hit.point, Quaternion.Euler(Vector3.right * -90f));
-                    instance.Play();
-                    Destroy(instance.gameObject, 1f); // Cleanup
+                    var fx = Instantiate(hitEffectPrefab, hit.point, Quaternion.LookRotation(hit.normal));
+                    Destroy(fx, 1f);
                 }
             }
         }

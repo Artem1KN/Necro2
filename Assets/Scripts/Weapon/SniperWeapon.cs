@@ -15,7 +15,7 @@ public class SniperWeapon : WeaponBase
 
     [Header("Effects")]
     public GameObject muzzleFlashPrefab;
-    public ParticleSystem hitEffect;
+    public GameObject hitEffectPrefab;
     public LineRenderer beamRenderer;
     public float beamDuration = 0.05f;
 
@@ -79,10 +79,9 @@ public class SniperWeapon : WeaponBase
 
     private void SpawnHitEffect(RaycastHit hit)
     {
-        if (hitEffect == null) return;
-        var fx = Instantiate(hitEffect, hit.point, Quaternion.LookRotation(hit.normal));
-        fx.Play();
-        Destroy(fx.gameObject, 1f);
+        if (hitEffectPrefab == null) return;
+        var fx = Instantiate(hitEffectPrefab, hit.point, Quaternion.LookRotation(hit.normal));
+        Destroy(fx, 1f);
     }
 
     private void SpawnMuzzleFlash()

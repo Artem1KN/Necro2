@@ -10,7 +10,7 @@ public class ShotgunWeapon : WeaponBase
 
     [Header("Effects")]
     public GameObject muzzleFlashPrefab;
-    public ParticleSystem hitEffect;
+    public GameObject hitEffectPrefab;
 
     protected override void TryFire()
     {
@@ -49,11 +49,10 @@ public class ShotgunWeapon : WeaponBase
 
         enemy.TakeDamage(damage);
 
-        if (hitEffect != null)
+        if (hitEffectPrefab != null)
         {
-            var fx = Instantiate(hitEffect, hit.point, Quaternion.LookRotation(hit.normal));
-            fx.Play();
-            Destroy(fx.gameObject, 1f);
+            var fx = Instantiate(hitEffectPrefab, hit.point, Quaternion.LookRotation(hit.normal));
+            Destroy(fx, 1f);
         }
     }
 
