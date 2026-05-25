@@ -66,7 +66,7 @@ public class RocketProjectile : MonoBehaviour
             int rootId = col.transform.root.GetInstanceID();
             if (!visited.Add(rootId)) continue;
 
-            float distance = Vector3.Distance(transform.position, col.ClosestPoint(transform.position));
+            float distance = Vector3.Distance(transform.position, col.bounds.ClosestPoint(transform.position));
             float normalized = Mathf.Clamp01(distance / explosionRadius);
             float damageScale = falloff.Evaluate(normalized);
             float finalDamage = damage * damageScale;

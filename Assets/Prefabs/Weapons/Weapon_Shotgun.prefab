@@ -140,6 +140,8 @@ MonoBehaviour:
   coneAngle: 10
   muzzleFlashPrefab: {fileID: 0}
   hitEffectPrefab: {fileID: 4333762886683876605, guid: 0dbbc2632c2fe413a9222345fa2a6a5d, type: 3}
+  tracerPrefab: {fileID: 2226766214515110904, guid: 17e962acf12f740779b62a0001551ebd, type: 3}
+  muzzlePoint: {fileID: 0}
 --- !u!1 &4923728721189849667
 GameObject:
   m_ObjectHideFlags: 0

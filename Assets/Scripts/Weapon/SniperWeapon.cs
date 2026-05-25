@@ -23,8 +23,9 @@ public class SniperWeapon : WeaponBase
 
     protected override void TryFire()
     {
-        Vector3 origin = transform.position;
-        Vector3 direction = transform.forward;
+        var cam = Camera.main;
+        Vector3 origin = cam != null ? cam.transform.position : transform.position;
+        Vector3 direction = cam != null ? cam.transform.forward : transform.forward;
 
         var hits = Physics.RaycastAll(origin, direction, maxRange, enemyLayers);
         Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));

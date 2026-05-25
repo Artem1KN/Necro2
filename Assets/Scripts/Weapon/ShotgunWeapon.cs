@@ -11,6 +11,8 @@ public class ShotgunWeapon : WeaponBase
     [Header("Effects")]
     public GameObject muzzleFlashPrefab;
     public GameObject hitEffectPrefab;
+    public GameObject tracerPrefab;
+    public Transform muzzlePoint;
 
     protected override void TryFire()
     {

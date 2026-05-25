@@ -12,11 +12,6 @@ public class AssaultRifleWeapon : WeaponBase
 
     protected override void TryFire()
     {
-        //if (data.isOverheated) return; // На всякий случай — хотя проверка уже есть в HandleContinuousInput
-
-        Debug.Log("[AssaultRifle] Fire! Current heat: " + currentHeat);
-
-        // 🔫 Perform Hitscan shot
         Ray ray = GetRayWithSpread();
         RaycastHit hit;
         if (Physics.Raycast(ray, out hit, maxRange, enemyLayers))
@@ -76,13 +71,14 @@ public class AssaultRifleWeapon : WeaponBase
     /// </summary>
     private Ray GetRayWithSpread()
     {
-        Vector3 direction = transform.forward;
-        // Небольшой случайный поворот по Y и Z (векторы локальные)
+        var cam = Camera.main;
+        Vector3 origin = cam != null ? cam.transform.position : transform.position;
+        Vector3 direction = cam != null ? cam.transform.forward : transform.forward;
+
         float spreadX = Random.Range(-data.spreadAngle, data.spreadAngle);
         float spreadY = Random.Range(-data.spreadAngle, data.spreadAngle);
-
         Vector3 spreadDirection = Quaternion.Euler(spreadY, spreadX, 0) * direction;
-        return new Ray(transform.position, spreadDirection);
+        return new Ray(origin, spreadDirection);
     }
 
     /// <summary>
