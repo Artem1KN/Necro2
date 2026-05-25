@@ -172,10 +172,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5831db2b5074034c8a0c49e8fbb7b6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AI_Zombie
-  moveSpeed: 3
+  moveSpeed: 2.5
   attackRange: 2
-  damagePerHit: 10
-  attackCooldown: 1.5
+  damagePerHit: 5
+  attackCooldown: 2
   attackOffset: {x: 0, y: 0, z: 1.2}
   playerLayer:
     serializedVersion: 2
