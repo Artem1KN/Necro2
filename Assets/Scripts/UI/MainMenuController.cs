@@ -15,7 +15,7 @@ public class MainMenuController : MonoBehaviour
 
     [Header("Scenes")]
     [Tooltip("Scene name to load via LoadingScreenController. Must be in Build Settings.")]
-    [SerializeField] private string firstLevelScene = "Level_01";
+    [SerializeField] private string firstLevelScene = "sc temp";
 
     [SerializeField] private LoadingScreenController loadingScreen;
 

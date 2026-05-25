@@ -22,24 +22,14 @@ public class ArrowProjectile : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (hasHit) return; // Чтобы не срабатывало дважды
+        if (hasHit) return;
 
-        // Проверяем, есть ли у цели компонент врага
         EnemyBase enemy = other.GetComponentInParent<EnemyBase>();
         if (enemy != null)
         {
             enemy.TakeDamage(damage);
-            Debug.Log($"[Arrow] Hit {enemy.name} for {damage} damage!");
+            hasHit = true;
+            Destroy(gameObject);
         }
-
-        // Эффект попадания (можно добавить спавн частиц здесь)
-        hasHit = true;
-        
-        // Стрела останавливается или втыкается в объект
-        rb.linearVelocity = Vector3.zero;
-        rb.isKinematic = true; 
-
-        // Удаляем стрелу через короткое время после попадания
-        Destroy(gameObject, 0.5f);
     }
 }

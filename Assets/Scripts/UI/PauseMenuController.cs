@@ -16,21 +16,28 @@ public class PauseMenuController : MonoBehaviour
     [Header("Scenes")]
     [SerializeField] private string mainMenuScene = "MainMenu";
 
-    [Header("Input")]
-    [SerializeField] private InputAction pauseAction = new(binding: "<Keyboard>/escape");
-
     public bool IsPaused { get; private set; }
+
+    private InputAction pauseAction;
 
     private void OnEnable()
     {
+        pauseAction = new InputAction("Pause", InputActionType.Button);
+        pauseAction.AddBinding("<Keyboard>/escape");
+        pauseAction.AddBinding("<Keyboard>/p");
         pauseAction.performed += OnPausePressed;
         pauseAction.Enable();
     }
 
     private void OnDisable()
     {
-        pauseAction.performed -= OnPausePressed;
-        pauseAction.Disable();
+        if (pauseAction != null)
+        {
+            pauseAction.performed -= OnPausePressed;
+            pauseAction.Disable();
+            pauseAction.Dispose();
+            pauseAction = null;
+        }
     }
 
     private void Start()

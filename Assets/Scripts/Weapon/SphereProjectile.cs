@@ -57,30 +57,21 @@ public class SphereProjectile : MonoBehaviour, IDeflectable
     {
         if (hasHit) return;
 
-        // Проверяем, попал ли в игрока
         var playerDamagable = other.GetComponentInParent<IDamagable>();
         if (playerDamagable != null && targetTransform != null && other.gameObject == targetTransform.gameObject)
         {
-            // Наносим урон игроку
             playerDamagable.TakeDamage(damage);
-            Debug.Log($"[SphereProjectile] Hit player for {damage} damage!");
-
             hasHit = true;
-            HandlePlayerBlock(other);
+            Destroy(gameObject);
             return;
         }
 
-        // Проверяем, попал ли обратно в стрелявшего (после отражения)
         if (isReflected && shooterTransform != null && other.gameObject == shooterTransform.gameObject)
         {
             var shooterDamagable = other.GetComponentInParent<IDamagable>();
-            if (shooterDamagable != null)
-            {
-                shooterDamagable.TakeDamage(damage);
-                Debug.Log($"[SphereProjectile] Reflected! Hit shooter for {damage} damage!");
-            }
-
+            if (shooterDamagable != null) shooterDamagable.TakeDamage(damage);
             hasHit = true;
+            Destroy(gameObject);
         }
     }
 
