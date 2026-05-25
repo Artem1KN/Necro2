@@ -156,7 +156,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bccaed3976c67e042ac9fe15be7fc7af, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyBase
-  maxHP: 50
+  maxHP: 30
   energyOrbPrefab: {fileID: 1856535354971599619, guid: 231c809f890994f59995b6fc9ff40f33, type: 3}
   orbDropOnDeath: {fileID: 11400000, guid: 5ed84c1190f7d4c8fb444794ca26dd83, type: 2}
 --- !u!114 &7836845948240361843
@@ -171,10 +171,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5831db2b5074034c8a0c49e8fbb7b6d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::AI_Zombie
-  moveSpeed: 4
-  attackRange: 2.5
-  damagePerHit: 50
-  attackCooldown: 1
+  moveSpeed: 3
+  attackRange: 2
+  damagePerHit: 10
+  attackCooldown: 1.5
   attackOffset: {x: 0, y: 0, z: 1.2}
   playerLayer:
     serializedVersion: 2
