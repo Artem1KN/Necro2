@@ -131,6 +131,26 @@ public class PlayerMotor : MonoBehaviour
         }
     }
 
+    public void On_4(InputValue val)
+    {
+        if (val.isPressed && weaponManager != null) weaponManager.SwitchWeapon(3);
+    }
+
+    public void On_5(InputValue val)
+    {
+        if (val.isPressed && weaponManager != null) weaponManager.SwitchWeapon(4);
+    }
+
+    public void On_6(InputValue val)
+    {
+        if (val.isPressed && weaponManager != null) weaponManager.SwitchWeapon(5);
+    }
+
+    public void On_7(InputValue val)
+    {
+        if (val.isPressed && weaponManager != null) weaponManager.SwitchWeapon(6);
+    }
+
     public void OnQuickSwap(InputValue val)
     {
         if (val.isPressed && weaponManager != null)
