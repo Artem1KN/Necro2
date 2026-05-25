@@ -7,16 +7,11 @@ public class AssaultRifleWeapon : WeaponBase
     public LayerMask enemyLayers;              // Слой врагов
     public float maxRange = 10f;               // Дальность hitscan
     public float spreadAngle = 2f;             // Разброс направления выстрела (в градусах)
-    public GameObject muzzleFlashPrefab;       // Визуал выстрела (опционально)
-    public ParticleSystem hitEffect;           // Эффект при попадании в цель
+    public GameObject muzzleFlashPrefab;
+    public GameObject hitEffectPrefab;
 
     protected override void TryFire()
     {
-        //if (data.isOverheated) return; // На всякий случай — хотя проверка уже есть в HandleContinuousInput
-
-        Debug.Log("[AssaultRifle] Fire! Current heat: " + currentHeat);
-
-        // 🔫 Perform Hitscan shot
         Ray ray = GetRayWithSpread();
         RaycastHit hit;
         if (Physics.Raycast(ray, out hit, maxRange, enemyLayers))
@@ -37,12 +32,10 @@ public class AssaultRifleWeapon : WeaponBase
 
                 Debug.Log($"[Gun] Attack! Damage: {damage}");
 
-                // 🎯 Визуальный эффект попадания
-                if (hitEffect != null)
+                if (hitEffectPrefab != null)
                 {
-                    ParticleSystem instance = Instantiate(hitEffect, hit.point, Quaternion.Euler(Vector3.right * -90f));
-                    instance.Play();
-                    Destroy(instance.gameObject, 1f); // Cleanup
+                    var fx = Instantiate(hitEffectPrefab, hit.point, Quaternion.LookRotation(hit.normal));
+                    Destroy(fx, 1f);
                 }
             }
         }
@@ -52,11 +45,7 @@ public class AssaultRifleWeapon : WeaponBase
         // 🔥 Нагреваем оружие — ВСЕГДА при выстреле (не только при попадании!)
         ApplyHeat(data.heatPerShot);
 
-        // 🎯 Recoil
-        if (playerMotor != null)
-        {
-            //playerMotor.AddRecoil(data.recoilStrength, data.recoilDuration);
-        }
+        AddRecoilFromData();
 
         // ✨ Muzzle flash (опционально)
         if (muzzleFlashPrefab != null)
@@ -82,13 +71,14 @@ public class AssaultRifleWeapon : WeaponBase
     /// </summary>
     private Ray GetRayWithSpread()
     {
-        Vector3 direction = transform.forward;
-        // Небольшой случайный поворот по Y и Z (векторы локальные)
+        var cam = Camera.main;
+        Vector3 origin = cam != null ? cam.transform.position : transform.position;
+        Vector3 direction = cam != null ? cam.transform.forward : transform.forward;
+
         float spreadX = Random.Range(-data.spreadAngle, data.spreadAngle);
         float spreadY = Random.Range(-data.spreadAngle, data.spreadAngle);
-
         Vector3 spreadDirection = Quaternion.Euler(spreadY, spreadX, 0) * direction;
-        return new Ray(transform.position, spreadDirection);
+        return new Ray(origin, spreadDirection);
     }
 
     /// <summary>

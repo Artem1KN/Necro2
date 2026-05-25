@@ -44,11 +44,7 @@ public class CrossbowWeapon : WeaponBase
             TriggerMuzzleFlash();
         }
 
-        // 4. Отдача (Recoil)
-        if (playerMotor != null)
-        {
-            // playerMotor.AddRecoil(data.recoilStrength, data.recoilDuration);
-        }
+        AddRecoilFromData();
     }
 
     protected override void ExecuteSkill()

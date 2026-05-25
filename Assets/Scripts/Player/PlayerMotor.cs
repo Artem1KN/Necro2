@@ -26,6 +26,24 @@ public class PlayerMotor : MonoBehaviour
     [Header("Handlers")]
     [SerializeField] private WallRunHandler wallRunHandler;
     [SerializeField] private CameraEffectsHandler cameraEffectsHandler;
+    [SerializeField] private RecoilController recoilController;
+
+    public void AddRecoil(float strength, float duration)
+    {
+        if (recoilController != null) recoilController.AddKick(strength, duration);
+    }
+
+    public void ApplyExternalImpulse(Vector3 impulse)
+    {
+        _verticalVelocity += impulse.y;
+
+        Vector3 horizontal = new(impulse.x, 0f, impulse.z);
+        if (horizontal.sqrMagnitude > 0.001f)
+        {
+            _lastMoveDirection = horizontal.normalized;
+            _dashVelocity += horizontal.magnitude;
+        }
+    }
 
     [Header("References")]
     [SerializeField] private CharacterController _characterController;
@@ -111,6 +129,26 @@ public class PlayerMotor : MonoBehaviour
         {
             weaponManager.SwitchWeapon(2);
         }
+    }
+
+    public void On_4(InputValue val)
+    {
+        if (val.isPressed && weaponManager != null) weaponManager.SwitchWeapon(3);
+    }
+
+    public void On_5(InputValue val)
+    {
+        if (val.isPressed && weaponManager != null) weaponManager.SwitchWeapon(4);
+    }
+
+    public void On_6(InputValue val)
+    {
+        if (val.isPressed && weaponManager != null) weaponManager.SwitchWeapon(5);
+    }
+
+    public void On_7(InputValue val)
+    {
+        if (val.isPressed && weaponManager != null) weaponManager.SwitchWeapon(6);
     }
 
     public void OnQuickSwap(InputValue val)

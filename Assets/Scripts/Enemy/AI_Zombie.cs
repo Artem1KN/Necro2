@@ -1,164 +1,97 @@
-using System;
 using UnityEngine;
 
-/// <summary>
-/// Простой AI-зомби с двумя состояниями:
-/// 1. Chase — движение к игроку.
-/// 2. Attack — остановка и атака при попадании в радиус attackRange.
-/// Не использует NavMesh. Работает только в плоскости XZ.
-/// Всегда стремится к игроку, пока не находится в зоне атаки (attackRange).
-/// Атака проверяется в Update по дистанции и кулдауну — без зависимости от физических событий.
-/// </summary>
 [RequireComponent(typeof(Rigidbody), typeof(EnemyBase))]
 public class AI_Zombie : MonoBehaviour
 {
-    [Header("Chase Settings")]
+    [Header("Chase")]
     public float moveSpeed = 4f;
 
-    [Header("Attack Settings")]
+    [Header("Attack")]
     public float attackRange = 2.5f;
     public float damagePerHit = 50f;
-    public float attackCooldown = 1f; // Секунды между атаками
-
-    [Tooltip("Смещение сферы атаки относительно центра модели (например, вперед)")]
+    public float attackCooldown = 1f;
     public Vector3 attackOffset = new Vector3(0, 0, 1.2f);
 
-    [Header("References & Layers")]
-    [Tooltip("Слой игрока (по умолчанию 'Player')")]
-    public LayerMask playerLayer = 1 << 0;
+    [Header("References")]
+    public LayerMask playerLayer = ~0;
 
-    private enum State
-    {
-        Chase,
-        Attack
-    }
+    private enum State { Chase, Attack }
 
-    // Компоненты
     private EnemyBase enemyBase;
     private Transform targetTransform;
     private Rigidbody rb;
-
-    // Состояние
     private State currentState = State.Chase;
     private float lastAttackTime = -Mathf.Infinity;
+    private Vector3 chaseDirection;
 
-    void Awake()
+    private void Awake()
     {
         enemyBase = GetComponent<EnemyBase>();
         rb = GetComponent<Rigidbody>();
-
-        // Создаём сферический триггер только для визуализации (Gizmos) или будущих нужд.
-        // Он больше не участвует в логике атаки — проверка через дистанцию в Update.
-        var sphereCollider = gameObject.AddComponent<SphereCollider>();
-        sphereCollider.radius = attackRange;
-        sphereCollider.isTrigger = true;
-        sphereCollider.center = attackOffset;
+        rb.freezeRotation = true;
     }
 
-    void Start()
+    private void Start()
     {
-        targetTransform = FindFirstObjectByType<PlayerMotor>()?.transform ?? GameObject.FindGameObjectWithTag("Player")?.transform;
+        targetTransform = FindFirstObjectByType<PlayerMotor>()?.transform
+            ?? FindFirstObjectByType<TestPlayerController>()?.transform
+            ?? GameObject.FindGameObjectWithTag("Player")?.transform;
 
         if (targetTransform == null)
-        {
-            Debug.LogWarning("[Zombie] Player not found! AI will stand idle.");
-        }
-
-        //rb.useGravity = false;
+            Debug.LogWarning("[AI_Zombie] Player not found. Standing idle.", this);
     }
 
-    void Update()
+    private void Update()
     {
         if (targetTransform == null) return;
 
-        // Расчёт расстояния до игрока
-        float distanceToPlayer = Vector3.Distance(transform.position, targetTransform.position);
+        Vector3 toPlayer = targetTransform.position - transform.position;
+        toPlayer.y = 0f;
+        float distance = toPlayer.magnitude;
+        chaseDirection = distance > 0.01f ? toPlayer / distance : Vector3.zero;
 
-        // Определение состояния: атака — если в радиусе атаки
-        currentState = (distanceToPlayer <= attackRange) ? State.Attack : State.Chase;
+        currentState = distance <= attackRange ? State.Attack : State.Chase;
 
-        switch (currentState)
+        if (currentState == State.Attack && Time.time - lastAttackTime >= attackCooldown)
+            Attack();
+
+        if (chaseDirection.sqrMagnitude > 0.001f)
         {
-            case State.Chase:
-                Chase();
-                break;
-            case State.Attack:
-                // Атакуем, если прошёл кулдаун и мы в зоне атаки
-                if (Time.time - lastAttackTime >= attackCooldown)
-                {
-                    Attack();
-                }
-                break;
-        }
-
-        // Поворот модели к игроку всегда при наличии цели
-        if (targetTransform != null && currentState == State.Chase)
-        {
-            Vector3 direction = targetTransform.position - transform.position;
-            direction = Vector3.ProjectOnPlane(direction, Vector3.up);
-            direction.Normalize();
-            Quaternion targetRotation = Quaternion.LookRotation(direction);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 10f);
+            var targetRot = Quaternion.LookRotation(chaseDirection);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, Time.deltaTime * 10f);
         }
     }
 
-    /// <summary>
-    /// Движение к игроку.
-    /// </summary>
-    private void Chase()
+    private void FixedUpdate()
     {
-        if (targetTransform == null) return;
+        if (targetTransform == null || currentState != State.Chase) return;
+        if (chaseDirection.sqrMagnitude < 0.001f) return;
 
-        Vector3 direction = targetTransform.position - transform.position;
-        direction = Vector3.ProjectOnPlane(direction, Vector3.up); // только XZ
-        direction.Normalize();
-
-        rb.MovePosition(transform.position + transform.forward * moveSpeed * Time.fixedDeltaTime);
+        Vector3 step = chaseDirection * (moveSpeed * Time.fixedDeltaTime);
+        rb.MovePosition(rb.position + step);
     }
 
-    /// <summary>
-    /// Реализация атаки: наносит урон игроку.
-    /// </summary>
     private void Attack()
     {
-        // Проверка слоя игрока (доп. защита)
-        int playerLayerValue = playerLayer.value;
-        int targetLayer = targetTransform.gameObject.layer;
+        if (targetTransform == null) return;
 
-        if ((playerLayerValue & (1 << targetLayer)) == 0) return;
+        int targetLayer = targetTransform.gameObject.layer;
+        if ((playerLayer.value & (1 << targetLayer)) == 0) return;
 
         lastAttackTime = Time.time;
 
-        var playerDamagable = targetTransform.GetComponent<IDamagable>();
-        if (playerDamagable != null)
-        {
-            float remainingHP = playerDamagable.TakeDamage(damagePerHit);
-            Debug.Log($"[Zombie] Hit player! HP: {remainingHP}/{playerDamagable.MaxHP}");
-        }
-        else
-        {
-            Debug.LogWarning("[Zombie] Player doesn't implement IDamagable!");
-        }
+        var damagable = targetTransform.GetComponent<IDamagable>()
+            ?? targetTransform.GetComponentInParent<IDamagable>();
+        if (damagable != null)
+            damagable.TakeDamage(damagePerHit);
     }
 
 #if UNITY_EDITOR
-    void OnDrawGizmos()
+    private void OnDrawGizmos()
     {
-        // Визуализация зоны атаки (для отладки)
         Gizmos.color = new Color(1, 0.5f, 0, 0.3f);
         Vector3 worldCenter = transform.TransformPoint(attackOffset);
         Gizmos.DrawWireSphere(worldCenter, attackRange);
-
-        // Визуализация направления взгляда
-        if (targetTransform != null)
-        {
-            Vector3 dir = targetTransform.position - transform.position;
-            dir = Vector3.ProjectOnPlane(dir, Vector3.up);
-            dir.Normalize();
-
-            Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(transform.position + transform.forward * attackRange, 0.2f);
-        }
     }
 #endif
 }
