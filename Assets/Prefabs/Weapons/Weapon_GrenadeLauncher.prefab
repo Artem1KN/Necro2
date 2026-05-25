@@ -121,7 +121,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: c6be7e6e880ee4110952b9bc1eb24280, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -161,7 +161,8 @@ MonoBehaviour:
   currentHeat: 0
   isOverheated: 0
   playerMotor: {fileID: 0}
-  grenadePrefab: {fileID: 0}
-  spawnPoint: {fileID: 0}
+  testPlayer: {fileID: 0}
+  grenadePrefab: {fileID: 2741161230068140844, guid: 72909410b8e1949a38c30467839676cf, type: 3}
+  spawnPoint: {fileID: 6231322869758359724}
   explosionRadius: 4
   muzzleFlashPrefab: {fileID: 0}

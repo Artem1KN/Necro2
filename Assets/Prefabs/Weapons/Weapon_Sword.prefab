@@ -90,7 +90,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 0d32dd4b86de04a32b6e45d0b9aa7682, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -133,10 +133,10 @@ MonoBehaviour:
   testPlayer: {fileID: 0}
   enemyLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 4294967295
   attackRange: 2
   attackRadius: 1
-  attackPoint: {fileID: 0}
+  attackPoint: {fileID: 1783713470799420555}
   parryWindowSeconds: 0.25
   parryRadius: 3
   deflectDamageMultiplier: 2

@@ -130,8 +130,8 @@ MonoBehaviour:
   currentHeat: 0
   isOverheated: 0
   playerMotor: {fileID: 0}
-  rocketPrefab: {fileID: 0}
-  spawnPoint: {fileID: 0}
+  rocketPrefab: {fileID: 8136865892386709018, guid: f3eeb2882d8c94fb9875a48b6afb0656, type: 3}
+  spawnPoint: {fileID: 8200222320912449043}
   explosionRadius: 5
   muzzleFlashPrefab: {fileID: 0}
 --- !u!1 &6935722511608867886
