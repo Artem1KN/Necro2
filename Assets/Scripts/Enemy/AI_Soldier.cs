@@ -40,10 +40,15 @@ public class AI_Soldier : MonoBehaviour
     private float EffectiveAccuracy => Mathf.Clamp01(accuracy + aggressiveness * 0.3f);
     private float EffectiveCooldown => attackCooldown * Mathf.Clamp(1f - aggressiveness * 0.5f, 0.1f, 1f);
 
+    private Animator anim; // Добавляем переменную для аниматора
+
+    public Transform firePoint; 
+
     private void Awake()
     {
         enemyBase = GetComponent<EnemyBase>();
         rb = GetComponent<Rigidbody>();
+        anim = GetComponent<Animator>(); // Инициализируем аниматор
     }
 
     private void Start()
@@ -61,6 +66,12 @@ public class AI_Soldier : MonoBehaviour
 
         float distance = Vector3.Distance(transform.position, targetTransform.position);
         currentState = distance <= fireDistance ? State.Attack : State.Chase;
+
+        // --- НОВАЯ ЛОГИКА ДЛЯ АНИМАЦИИ ПЕРЕМЕЩЕНИЯ ---
+        // Если мы в состоянии Chase (преследование), значит мы движемся
+        bool isMoving = (currentState == State.Chase);
+        anim.SetBool("isMoving", isMoving);
+        // ----------------------------------------------
 
         switch (currentState)
         {
@@ -96,6 +107,13 @@ public class AI_Soldier : MonoBehaviour
     {
         lastAttackTime = Time.time;
 
+        // --- НОВАЯ ЛОГИКА ДЛЯ АНИМАЦИИ АТАКИ ---
+        anim.SetBool("isAttacking", true); 
+        // Запускаем корутину, чтобы выключить анимацию атаки после завершения кадра/анимации
+        StartCoroutine(ResetAttackAnimation());
+        // ---------------------------------------
+
+
         if (sphereProjectilePrefab == null)
         {
             Debug.LogWarning("[AI_Soldier] SphereProjectile prefab not assigned.", this);
@@ -105,11 +123,23 @@ public class AI_Soldier : MonoBehaviour
         Vector3 aim = (targetTransform.position - transform.position).normalized;
         aim = ApplySpread(aim);
 
-        var spawnPos = transform.position + transform.forward;
-        var projectileObj = Instantiate(sphereProjectilePrefab, spawnPos, Quaternion.LookRotation(aim));
+        //var spawnPos = transform.position + transform.forward;
+        //var projectileObj = Instantiate(sphereProjectilePrefab, spawnPos, Quaternion.LookRotation(aim));
+
+        
+        var spawnPos = firePoint.position; 
+        // И используйте rotation самого firePoint, если хотите, чтобы направление зависело от точки
+        var projectileObj = Instantiate(sphereProjectilePrefab, spawnPos, firePoint.rotation);
 
         if (projectileObj.TryGetComponent<SphereProjectile>(out var projectile))
             projectile.Initialize(damagePerHit, transform, targetTransform);
+    }
+
+    // Вспомогательная функция, чтобы анимация выстрела не "залипала"
+    private System.Collections.IEnumerator ResetAttackAnimation()
+    {
+        yield return new WaitForSeconds(0.5f); // Длительность анимации выстрела (подбери под ассет)
+        anim.SetBool("isAttacking", false);
     }
 
     private Vector3 ApplySpread(Vector3 direction)

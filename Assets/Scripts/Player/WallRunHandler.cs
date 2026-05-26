@@ -10,51 +10,50 @@ public class WallRunHandler : MonoBehaviour
     public float WallRunSpeed = 7f;
     public float WallJumpForce = 10f;
 
-    private bool _isWallRunning = false;
-    private Vector3 _wallNormal;
+    private bool isWallRunning = false;
+    private Vector3 wallNormal;
             
-    private Vector3 _wallRunDirection;
+    private Vector3 wallRunDirection;
 
-    // Properties to allow PlayerMotor to access state
-    public bool IsWallRunningState => _isWallRunning;
-    public Vector3 WallNormal => _wallNormal;
-    public Vector3 WallRunDirection => _wallRunDirection;
+    public bool IsWallRunningState => isWallRunning;
+    public Vector3 WallNormal => wallNormal;
+    public Vector3 WallRunDirection => wallRunDirection;
 
-    private CharacterController _characterController;
+    private CharacterController characterController;
 
     void Awake()
     {
-        _characterController = GetComponentInParent<CharacterController>();
+        characterController = GetComponentInParent<CharacterController>();
     }
 
     public void UpdateWallRunLogic(Vector3 lastMoveDirection, ref float verticalVelocity)
         {
-        if (_characterController == null) return;
+        if (characterController == null) return;
 
         bool hitLeft = leftWallDetector.IsColliding;
         bool hitRight = rightWallDetector.IsColliding;
 
-        if ((hitLeft || hitRight) && !_characterController.isGrounded)
+        if ((hitLeft || hitRight) && !characterController.isGrounded)
         {
-            bool wasWallRunning = _isWallRunning;
-            _isWallRunning = true;
-            _wallNormal = hitLeft ? leftWallDetector.outHit.normal : rightWallDetector.outHit.normal;
+            bool wasWallRunning = isWallRunning;
+            isWallRunning = true;
+            wallNormal = hitLeft ? leftWallDetector.outHit.normal : rightWallDetector.outHit.normal;
 
             if (!wasWallRunning)
             {
                 verticalVelocity = 0;
             }
 
-            Vector3 wallTangent = Vector3.Cross(_wallNormal, Vector3.up);
+            Vector3 wallTangent = Vector3.Cross(wallNormal, Vector3.up);
             if (Vector3.Dot(wallTangent, lastMoveDirection) < 0)
-                _wallRunDirection = -wallTangent;
+                wallRunDirection = -wallTangent;
             else
-                _wallRunDirection = wallTangent;
+                wallRunDirection = wallTangent;
         }
         else
         {
-            _isWallRunning = false;
-            _wallRunDirection = Vector3.zero;
+            isWallRunning = false;
+            wallRunDirection = Vector3.zero;
         }
     }
     

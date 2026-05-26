@@ -1183,7 +1183,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 10
@@ -1276,7 +1276,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
+    rgba: 4284901119
   m_fontColor: {r: 1, g: 0.4, b: 0.4, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -1289,7 +1289,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -2079,19 +2079,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2611077084125637564, guid: 3a8c40251310a4580a8d0192759b3d6c, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 0.706
       objectReference: {fileID: 0}
     - target: {fileID: 2611077084125637564, guid: 3a8c40251310a4580a8d0192759b3d6c, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -0.549
       objectReference: {fileID: 0}
     - target: {fileID: 2611077084125637564, guid: 3a8c40251310a4580a8d0192759b3d6c, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 0.44
       objectReference: {fileID: 0}
     - target: {fileID: 2611077084125637564, guid: 3a8c40251310a4580a8d0192759b3d6c, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.7514948
+      value: -0.99046874
       objectReference: {fileID: 0}
     - target: {fileID: 2611077084125637564, guid: 3a8c40251310a4580a8d0192759b3d6c, type: 3}
       propertyPath: m_LocalRotation.x
@@ -2099,7 +2099,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2611077084125637564, guid: 3a8c40251310a4580a8d0192759b3d6c, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.659739
+      value: -0.1377382
       objectReference: {fileID: 0}
     - target: {fileID: 2611077084125637564, guid: 3a8c40251310a4580a8d0192759b3d6c, type: 3}
       propertyPath: m_LocalRotation.z
@@ -2111,7 +2111,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2611077084125637564, guid: 3a8c40251310a4580a8d0192759b3d6c, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
+      value: -344.16602
       objectReference: {fileID: 0}
     - target: {fileID: 2611077084125637564, guid: 3a8c40251310a4580a8d0192759b3d6c, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
@@ -3692,7 +3692,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
@@ -4258,7 +4258,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 4294967295
+    rgba: 4281588223
   m_fontColor: {r: 1, g: 0.85, b: 0.2, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -4271,7 +4271,7 @@ MonoBehaviour:
   m_spriteAsset: {fileID: 0}
   m_tintAllSprites: 0
   m_StyleSheet: {fileID: 0}
-  m_TextStyleHashCode: 0
+  m_TextStyleHashCode: -1183493901
   m_overrideHtmlColors: 0
   m_faceColor:
     serializedVersion: 2
