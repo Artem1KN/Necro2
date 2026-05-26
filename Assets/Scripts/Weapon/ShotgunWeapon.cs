@@ -16,20 +16,31 @@ public class ShotgunWeapon : WeaponBase
 
     protected override void TryFire()
     {
-        Vector3 origin = transform.position;
-        Vector3 baseDirection = transform.forward;
+        var cam = Camera.main;
+        Vector3 origin = cam != null ? cam.transform.position : transform.position;
+        Vector3 baseDirection = cam != null ? cam.transform.forward : transform.forward;
+        Vector3 tracerFrom = muzzlePoint != null ? muzzlePoint.position : transform.position;
 
         for (int i = 0; i < pelletCount; i++)
         {
             Vector3 dir = ApplyConeSpread(baseDirection);
-            if (Physics.Raycast(origin, dir, out RaycastHit hit, maxRange, enemyLayers))
-                HandlePelletHit(hit);
+            bool hit = WeaponRaycastUtil.RaycastSkippingPlayer(origin, dir, maxRange, enemyLayers, out RaycastHit info);
+            Vector3 tracerTo = hit ? info.point : origin + dir * maxRange;
+            SpawnTracer(tracerFrom, tracerTo);
+            if (hit) HandlePelletHit(info);
         }
 
         ApplyHeat(data.heatPerShot);
         SpawnMuzzleFlash();
-
         AddRecoilFromData();
+    }
+
+    private void SpawnTracer(Vector3 from, Vector3 to)
+    {
+        if (tracerPrefab == null) return;
+        var go = Instantiate(tracerPrefab, from, Quaternion.identity);
+        if (go.TryGetComponent<BulletTracer>(out var tracer)) tracer.Setup(from, to);
+        Destroy(go, 0.2f);
     }
 
     protected override void ExecuteSkill()

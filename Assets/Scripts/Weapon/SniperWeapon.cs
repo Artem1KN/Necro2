@@ -36,6 +36,8 @@ public class SniperWeapon : WeaponBase
         foreach (var hit in hits)
         {
             if (hitsApplied >= maxPenetrations) break;
+            if (hit.collider == null) continue;
+            if (hit.collider.transform.root.CompareTag("Player")) continue;
 
             EnemyBase enemy = hit.collider.GetComponent<EnemyBase>()
                 ?? hit.collider.GetComponentInParent<EnemyBase>();

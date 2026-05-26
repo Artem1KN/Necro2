@@ -13,24 +13,16 @@ public class AssaultRifleWeapon : WeaponBase
     protected override void TryFire()
     {
         Ray ray = GetRayWithSpread();
-        RaycastHit hit;
-        if (Physics.Raycast(ray, out hit, maxRange, enemyLayers))
+        if (WeaponRaycastUtil.RaycastSkippingPlayer(ray.origin, ray.direction, maxRange, enemyLayers, out RaycastHit hit))
         {
-            EnemyBase enemy = hit.collider.GetComponent<EnemyBase>();
+            EnemyBase enemy = hit.collider.GetComponent<EnemyBase>() ?? hit.collider.GetComponentInParent<EnemyBase>();
             if (enemy != null)
             {
                 float damage = data.baseDamage;
-
-                // 🔥 Бонус урона при попадании в зону оптимального перегрева
                 if (!isOverheated && currentHeat >= data.optimalZoneStart && currentHeat <= data.optimalZoneEnd)
-                {
                     damage *= data.optimalHeatMultiplier;
-                    Debug.Log($"[AssaultRifle] Optimal heat bonus! Damage: {damage}");
-                }
 
                 enemy.TakeDamage(damage);
-
-                Debug.Log($"[Gun] Attack! Damage: {damage}");
 
                 if (hitEffectPrefab != null)
                 {
