@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RoomCombatData
   roomName: Test Arena
   waves:
-  - {fileID: 11400000, guid: bc9669150892f4be0aac1c384b816b4f, type: 2}
   - {fileID: 11400000, guid: ed1f5ec8dd93f46eea2050159a782528, type: 2}
+  - {fileID: 11400000, guid: bc9669150892f4be0aac1c384b816b4f, type: 2}
   lockDoorsDuringCombat: 0
   oneShot: 1
