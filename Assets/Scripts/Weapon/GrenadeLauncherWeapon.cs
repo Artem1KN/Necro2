@@ -28,6 +28,7 @@ public class GrenadeLauncherWeapon : WeaponBase
         SpawnMuzzleFlash();
 
         AddRecoilFromData();
+        PlayFireSfx();
     }
 
     protected override void ExecuteSkill()

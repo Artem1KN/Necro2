@@ -28,6 +28,9 @@ public class AI_Soldier : MonoBehaviour
     [Header("References")]
     public LayerMask playerLayer = 1 << 0;
 
+    [Header("Audio")]
+    public AudioClip fireSfx;
+
     private enum State { Chase, Attack }
 
     private EnemyBase enemyBase;
@@ -133,6 +136,9 @@ public class AI_Soldier : MonoBehaviour
 
         if (projectileObj.TryGetComponent<SphereProjectile>(out var projectile))
             projectile.Initialize(damagePerHit, transform, targetTransform);
+
+        if (fireSfx != null)
+            AudioManager.EnsureExists().PlaySfxAt(fireSfx, spawnPos);
     }
 
     // Вспомогательная функция, чтобы анимация выстрела не "залипала"

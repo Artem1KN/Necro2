@@ -33,6 +33,7 @@ public class RocketLauncherWeapon : WeaponBase
         SpawnMuzzleFlash();
 
         AddRecoilFromData();
+        PlayFireSfx();
     }
 
     protected override void ExecuteSkill()

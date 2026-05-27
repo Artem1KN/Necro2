@@ -30,6 +30,7 @@ public class SwordWeapon : WeaponBase
     protected override void TryFire()
     {
         PerformAttack(data.baseDamage);
+        PlayFireSfx();
     }
 
     private void PerformAttack(float damage)
@@ -57,6 +58,7 @@ public class SwordWeapon : WeaponBase
     {
         parryTimer = parryWindowSeconds;
         parrySucceededThisWindow = false;
+        PlaySkillSfx();
     }
 
     private void Update()

@@ -30,6 +30,7 @@ public class ShotgunWeapon : WeaponBase
         SpawnMuzzleFlash();
 
         AddRecoilFromData();
+        PlayFireSfx();
     }
 
     protected override void ExecuteSkill()
