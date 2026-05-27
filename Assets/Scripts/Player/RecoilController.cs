@@ -28,7 +28,12 @@ public class RecoilController : MonoBehaviour
 
     private void Awake()
     {
-        if (recoilPivot == null) recoilPivot = transform;
+        if (recoilPivot == null)
+        {
+            var cam = Camera.main;
+            if (cam != null) recoilPivot = cam.transform;
+            else recoilPivot = transform;
+        }
     }
 
     public void AddKick(float strength, float duration)

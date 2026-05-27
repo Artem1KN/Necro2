@@ -30,6 +30,6 @@ MonoBehaviour:
   heatPerSkill: 0
   skillCooldown: 1.5
   weaponPrefab: {fileID: 0}
-  recoilStrength: 0.1
-  recoilDuration: 0.1
+  recoilStrength: 2.5
+  recoilDuration: 0.12
   spreadAngle: 5

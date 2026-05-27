@@ -30,6 +30,7 @@ public class PlayerMotor : MonoBehaviour
 
     public void AddRecoil(float strength, float duration)
     {
+        if (recoilController == null) recoilController = GetComponentInChildren<RecoilController>(true);
         if (recoilController != null) recoilController.AddKick(strength, duration);
     }
 
