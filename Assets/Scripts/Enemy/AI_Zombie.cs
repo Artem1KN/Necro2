@@ -23,12 +23,14 @@ public class AI_Zombie : MonoBehaviour
     private State currentState = State.Chase;
     private float lastAttackTime = -Mathf.Infinity;
     private Vector3 chaseDirection;
+    private Animator anim; // Добавляем переменную для аниматора
 
     private void Awake()
     {
         enemyBase = GetComponent<EnemyBase>();
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
+        anim = GetComponent<Animator>(); // Инициализируем аниматор
     }
 
     private void Start()
@@ -51,6 +53,9 @@ public class AI_Zombie : MonoBehaviour
         chaseDirection = distance > 0.01f ? toPlayer / distance : Vector3.zero;
 
         currentState = distance <= attackRange ? State.Attack : State.Chase;
+        // --- НОВАЯ ЛОГИКА ДЛЯ АНИМАЦИИ ПЕРЕМЕЩЕНИЯ ---
+        bool isMoving = (currentState == State.Chase);
+        anim.SetBool("isMoving", isMoving);
 
         if (currentState == State.Attack && Time.time - lastAttackTime >= attackCooldown)
             Attack();
@@ -80,10 +85,21 @@ public class AI_Zombie : MonoBehaviour
 
         lastAttackTime = Time.time;
 
+        // --- НОВАЯ ЛОГИКА ДЛЯ АНИМАЦИИ АТАКИ ---
+        anim.SetBool("isAttacking", true); 
+        StartCoroutine(ResetAttackAnimation());
+
         var damagable = targetTransform.GetComponent<IDamagable>()
             ?? targetTransform.GetComponentInParent<IDamagable>();
         if (damagable != null)
             damagable.TakeDamage(damagePerHit);
+    }
+
+    // --- НОВАЯ ЛОГИКА: Сброс анимации атаки ---
+    private System.Collections.IEnumerator ResetAttackAnimation()
+    {
+        yield return new WaitForSeconds(0.5f); // Подберите время под вашу анимацию зомби
+        anim.SetBool("isAttacking", false);
     }
 
 #if UNITY_EDITOR

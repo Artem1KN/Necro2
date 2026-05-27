@@ -110,7 +110,7 @@ GameObject:
   - component: {fileID: 2412284714082405987}
   - component: {fileID: -8338725257848518065}
   m_Layer: 0
-  m_Name: ToonSoldier_demo + anim
+  m_Name: Soldier_my_ver
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

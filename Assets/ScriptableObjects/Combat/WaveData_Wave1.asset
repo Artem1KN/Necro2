@@ -15,7 +15,7 @@ MonoBehaviour:
   waveName: Wave 1
   delayBeforeStart: 0.5
   spawns:
-  - enemyPrefab: {fileID: 595947375119292950, guid: 3eb09e5fd76354056aca808723f73489, type: 3}
+  - enemyPrefab: {fileID: 8033535808469301096, guid: 8f8336e281df36946b40747e0ceb0e19, type: 3}
     count: 3
     spawnInterval: 0.6
     spawnPointIndex: -1
