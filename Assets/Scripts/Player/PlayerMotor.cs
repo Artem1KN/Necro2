@@ -26,7 +26,10 @@ public class PlayerMotor : MonoBehaviour
     [Header("Handlers")]
     [SerializeField] private WallRunHandler wallRunHandler;
     [SerializeField] private CameraEffectsHandler cameraEffectsHandler;
-    [SerializeField] private RecoilController recoilController;
+
+    [Header("Recoil")]
+    [Tooltip("Camera-kick controller. Auto-found in children at Awake / on first shot if left empty.")]
+    public RecoilController recoilController;
 
     public void AddRecoil(float strength, float duration)
     {
@@ -75,6 +78,11 @@ public class PlayerMotor : MonoBehaviour
 
     private bool isSlide = false;
 
+    private void Awake()
+    {
+        if (recoilController == null) recoilController = GetComponentInChildren<RecoilController>(true);
+    }
+
     void Start()
     {
         Cursor.lockState = CursorLockMode.Locked;
@@ -84,7 +92,7 @@ public class PlayerMotor : MonoBehaviour
         // Remove direct initialization to avoid duplicate calls
 
         _attackAction = playerInput.actions.FindAction("Attack");
-        _skillAction = playerInput.actions.FindAction("Skill");        
+        _skillAction = playerInput.actions.FindAction("Skill");
     }
 
     // --- Input Handlers ---
