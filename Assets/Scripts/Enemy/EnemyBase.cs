@@ -14,11 +14,16 @@ public class EnemyBase : MonoBehaviour, IDamagable
     [Tooltip("Orb config applied to the spawned orb (heal value, size, scale).")]
     public OrbData orbDropOnDeath;
 
+    [Header("Audio")]
+    public AudioClip hurtSfx;
+    public AudioClip deathSfx;
+
     [Header("Events")]
     public Action<float, float> onHealthChanged;
     public Action onDeath;
 
     private float currentHP;
+    private Vector3 lastHitDirection;
 
     public float CurrentHP => currentHP;
     public float MaxHP => maxHP;
@@ -40,6 +45,9 @@ public class EnemyBase : MonoBehaviour, IDamagable
 
         onHealthChanged?.Invoke(currentHP, maxHP);
 
+        if (hurtSfx != null && currentHP > 0)
+            AudioManager.EnsureExists().PlaySfxAt(hurtSfx, transform.position);
+
         // Проверка смерти
         if (currentHP == 0)
         {
@@ -49,11 +57,30 @@ public class EnemyBase : MonoBehaviour, IDamagable
         return currentHP;
     }
 
+    /// Variant used by weapons that know the hit direction (for ragdoll impulse).
+    public float TakeDamage(float damage, Vector3 hitDirection)
+    {
+        lastHitDirection = hitDirection;
+        return TakeDamage(damage);
+    }
+
     private void Die()
     {
         SpawnEnergyOrb();
         onDeath?.Invoke();
-        Destroy(gameObject);
+
+        if (deathSfx != null)
+            AudioManager.EnsureExists().PlaySfxAt(deathSfx, transform.position);
+
+        var ragdoll = GetComponent<EnemyRagdollController>();
+        if (ragdoll != null)
+        {
+            ragdoll.TriggerRagdoll(lastHitDirection);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
     private void SpawnEnergyOrb()
