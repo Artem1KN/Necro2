@@ -6,6 +6,11 @@ public class PlayerHealth : MonoBehaviour, IDamagable
 {
     [Header("Health Settings")]
     public float maxHP = 100f;
+
+    [Header("Audio")]
+    public AudioClip hurtSfx;
+    public AudioClip deathSfx;
+
     [Header("Events")]
     public Action<float, float> onHealthChanged; // current, max
     public Action onDeath;
@@ -32,6 +37,9 @@ public class PlayerHealth : MonoBehaviour, IDamagable
         if (currentHP < 0) currentHP = 0;
 
         onHealthChanged?.Invoke(currentHP, maxHP);
+
+        if (hurtSfx != null && currentHP > 0)
+            AudioManager.EnsureExists().PlaySfx2D(hurtSfx);
 
         if (currentHP == 0 && !isDead)
         {
@@ -71,7 +79,10 @@ public class PlayerHealth : MonoBehaviour, IDamagable
         }
 */
         onDeath?.Invoke();
-        
+
+        if (deathSfx != null)
+            AudioManager.EnsureExists().PlaySfx2D(deathSfx);
+
         // Опционально: отключаем управление
         //var input = GetComponent<PlayerInput>() as MonoBehaviour; // замените на ваш класс управления
         //if (input != null) input.enabled = false;

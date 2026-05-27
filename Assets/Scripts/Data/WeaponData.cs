@@ -35,4 +35,9 @@ public class WeaponData : ScriptableObject
     public float recoilStrength = 0.1f;
     public float recoilDuration = 0.1f;
     public float spreadAngle = 5f;
+
+    [Header("Audio")]
+    public AudioClip fireSfx;
+    public AudioClip skillSfx;
+    public AudioClip overheatSfx;
 }

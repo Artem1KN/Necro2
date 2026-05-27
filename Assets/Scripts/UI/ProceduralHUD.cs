@@ -26,6 +26,14 @@ public class ProceduralHUD : MonoBehaviour
     public float maxSpeedForGauge = 15f;
     [Range(0f, 100f)] public float dangerHeatPercent = 80f;
 
+    [Header("Crosshair")]
+    public bool showCrosshair = true;
+    public float crosshairSize = 18f;
+    public float crosshairThickness = 2f;
+    public Color crosshairColor = new(1f, 1f, 1f, 0.85f);
+    public Color crosshairOverheatedColor = new(1f, 0.3f, 0.3f, 0.95f);
+    public float crosshairGapPx = 4f;
+
     [Header("Colors")]
     public Color heatNormalColor = new(0.22f, 1f, 0.08f);
     public Color heatDangerColor = new(1f, 0.19f, 0.19f);
@@ -54,6 +62,11 @@ public class ProceduralHUD : MonoBehaviour
 
     private RoomCombat trackedRoom;
 
+    private Image crosshairTop;
+    private Image crosshairBottom;
+    private Image crosshairLeft;
+    private Image crosshairRight;
+
     private struct SlotUI
     {
         public GameObject root;
@@ -79,11 +92,14 @@ public class ProceduralHUD : MonoBehaviour
 
     private void Start()
     {
+        AutoBindRefs();
+
         BuildRoot();
         BuildHpBar();
         BuildHotbar();
         BuildThermal();
         BuildWaveCounter();
+        if (showCrosshair) BuildCrosshair();
 
         if (playerHealth != null)
         {
@@ -92,12 +108,61 @@ public class ProceduralHUD : MonoBehaviour
         }
     }
 
+    private void AutoBindRefs()
+    {
+        if (playerHealth == null) playerHealth = FindObjectOfType<PlayerHealth>();
+        if (weaponManager == null) weaponManager = FindObjectOfType<WeaponManager>();
+        if (playerMotor == null) playerMotor = FindObjectOfType<PlayerMotor>();
+    }
+
     private void Update()
     {
         UpdateHotbar();
         UpdateThermal();
         UpdateSpeed();
         UpdateWave();
+        UpdateCrosshair();
+    }
+
+    private void BuildCrosshair()
+    {
+        var root = CreateRect("Crosshair", canvas.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
+        root.sizeDelta = new Vector2(crosshairSize * 2 + crosshairGapPx * 2, crosshairSize * 2 + crosshairGapPx * 2);
+        crosshairTop = MakeCrosshairLine(root, new Vector2(0, crosshairGapPx + crosshairSize * 0.5f), new Vector2(crosshairThickness, crosshairSize));
+        crosshairBottom = MakeCrosshairLine(root, new Vector2(0, -(crosshairGapPx + crosshairSize * 0.5f)), new Vector2(crosshairThickness, crosshairSize));
+        crosshairLeft = MakeCrosshairLine(root, new Vector2(-(crosshairGapPx + crosshairSize * 0.5f), 0), new Vector2(crosshairSize, crosshairThickness));
+        crosshairRight = MakeCrosshairLine(root, new Vector2(crosshairGapPx + crosshairSize * 0.5f, 0), new Vector2(crosshairSize, crosshairThickness));
+    }
+
+    private Image MakeCrosshairLine(RectTransform parent, Vector2 anchoredPos, Vector2 size)
+    {
+        var go = new GameObject("Line", typeof(RectTransform), typeof(Image));
+        go.transform.SetParent(parent, false);
+        var rt = go.GetComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0.5f, 0.5f);
+        rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.anchoredPosition = anchoredPos;
+        rt.sizeDelta = size;
+        var img = go.GetComponent<Image>();
+        img.color = crosshairColor;
+        img.raycastTarget = false;
+        return img;
+    }
+
+    private void UpdateCrosshair()
+    {
+        if (crosshairTop == null) return;
+        Color c = crosshairColor;
+        if (weaponManager != null)
+        {
+            var w = weaponManager.ActiveWeapon;
+            if (w != null && w.isOverheated) c = crosshairOverheatedColor;
+        }
+        crosshairTop.color = c;
+        crosshairBottom.color = c;
+        crosshairLeft.color = c;
+        crosshairRight.color = c;
     }
 
     private void BuildRoot()

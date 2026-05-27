@@ -15,11 +15,11 @@ MonoBehaviour:
   waveName: Wave 2
   delayBeforeStart: 1.5
   spawns:
-  - enemyPrefab: {fileID: 8033535808469301096, guid: 8f8336e281df36946b40747e0ceb0e19, type: 3}
+  - enemyPrefab: {fileID: 5314127531259945223, guid: e20768108f57f0543ba1d1a2b8024882, type: 3}
     count: 2
     spawnInterval: 0.4
     spawnPointIndex: -1
-  - enemyPrefab: {fileID: 968817150524308174, guid: c13250a1995c2884bbc57f58dc45dae6, type: 3}
+  - enemyPrefab: {fileID: 2349171404405472262, guid: 74b8c12ba600a8246b5cc182f7faf38c, type: 3}
     count: 2
     spawnInterval: 0.8
     spawnPointIndex: -1

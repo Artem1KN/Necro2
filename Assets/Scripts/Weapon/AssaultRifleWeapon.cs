@@ -46,6 +46,7 @@ public class AssaultRifleWeapon : WeaponBase
         ApplyHeat(data.heatPerShot);
 
         AddRecoilFromData();
+        PlayFireSfx();
 
         // ✨ Muzzle flash (опционально)
         if (muzzleFlashPrefab != null)

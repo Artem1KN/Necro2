@@ -27,6 +27,10 @@ public class GameOverScreen : MonoBehaviour
     public Color titleColor = new(1f, 0.2f, 0.2f);
     public Color countdownColor = new(0.95f, 0.95f, 0.95f);
 
+    [Header("Audio")]
+    public AudioClip gameOverMusic;
+    public AudioClip gameOverStinger;
+
     private Canvas canvas;
     private GameObject root;
     private TMP_Text countdownText;
@@ -55,6 +59,11 @@ public class GameOverScreen : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
         Time.timeScale = 0f;
+
+        if (gameOverStinger != null)
+            AudioManager.EnsureExists().PlaySfx2D(gameOverStinger);
+        if (gameOverMusic != null)
+            AudioManager.EnsureExists().PlayMusic(gameOverMusic);
 
         StartCoroutine(CountdownThenReload());
     }

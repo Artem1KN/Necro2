@@ -20,6 +20,18 @@ public abstract class WeaponBase : MonoBehaviour
         else if (testPlayer != null) testPlayer.AddRecoil(data.recoilStrength, data.recoilDuration);
     }
 
+    protected void PlayFireSfx()
+    {
+        if (data == null || data.fireSfx == null) return;
+        AudioManager.EnsureExists().PlaySfx2D(data.fireSfx);
+    }
+
+    protected void PlaySkillSfx()
+    {
+        if (data == null || data.skillSfx == null) return;
+        AudioManager.EnsureExists().PlaySfx2D(data.skillSfx);
+    }
+
     // Флаги состояния, которые мы будем получать из Motor
     private bool _isAttackHeld;
     private bool _isSkillHeld;

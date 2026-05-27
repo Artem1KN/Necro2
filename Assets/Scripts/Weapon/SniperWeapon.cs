@@ -53,6 +53,7 @@ public class SniperWeapon : WeaponBase
         FireBeam(origin, origin + direction * maxRange);
 
         AddRecoilFromData();
+        PlayFireSfx();
     }
 
     protected override void ExecuteSkill()

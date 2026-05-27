@@ -8,6 +8,9 @@ public class EnergyOrb : MonoBehaviour
     public OrbData orbData;
     public float collectDistance = 1f; // Дистанция сбора орба
 
+    [Header("Audio")]
+    public AudioClip pickupSfx;
+
     private Action<float, float> onHeal; // action(current, max)
     private Action<float> onCooldown; // action(amount)
 
@@ -68,6 +71,9 @@ public class EnergyOrb : MonoBehaviour
             }
         }
         */
+
+        if (pickupSfx != null)
+            AudioManager.EnsureExists().PlaySfxAt(pickupSfx, transform.position);
 
         // Уничтожаем орб после сбора
         Destroy(gameObject);

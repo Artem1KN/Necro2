@@ -45,6 +45,7 @@ public class CrossbowWeapon : WeaponBase
         }
 
         AddRecoilFromData();
+        PlayFireSfx();
     }
 
     protected override void ExecuteSkill()

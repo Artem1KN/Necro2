@@ -15,6 +15,9 @@ public class AI_Zombie : MonoBehaviour
     [Header("References")]
     public LayerMask playerLayer = ~0;
 
+    [Header("Audio")]
+    public AudioClip attackSfx;
+
     private enum State { Chase, Attack }
 
     private EnemyBase enemyBase;
@@ -93,6 +96,9 @@ public class AI_Zombie : MonoBehaviour
             ?? targetTransform.GetComponentInParent<IDamagable>();
         if (damagable != null)
             damagable.TakeDamage(damagePerHit);
+
+        if (attackSfx != null)
+            AudioManager.EnsureExists().PlaySfxAt(attackSfx, transform.position);
     }
 
     // --- НОВАЯ ЛОГИКА: Сброс анимации атаки ---

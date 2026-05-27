@@ -5337,6 +5337,7 @@ GameObject:
   - component: {fileID: 8190158607968938854}
   - component: {fileID: 8335505617828133973}
   - component: {fileID: 1636908505789349302}
+  - component: {fileID: -9158431313509440950}
   m_Layer: 0
   m_Name: Zombie_my_ver
   m_TagString: Untagged
@@ -5449,6 +5450,8 @@ MonoBehaviour:
   maxHP: 50
   energyOrbPrefab: {fileID: 0}
   orbDropOnDeath: {fileID: 0}
+  hurtSfx: {fileID: 0}
+  deathSfx: {fileID: 0}
 --- !u!114 &1636908505789349302
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5469,6 +5472,25 @@ MonoBehaviour:
   playerLayer:
     serializedVersion: 2
     m_Bits: 4294967295
+  attackSfx: {fileID: 0}
+--- !u!114 &-9158431313509440950
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8033535808469301096}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29d2e8a2a3707a441b6a80f069e590dc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyRagdollController
+  despawnDelay: 6
+  deathImpulse: 1.5
+  shrinkBeforeDestroy: 1
+  disableOnDeath: []
+  animator: {fileID: 0}
+  navAgent: {fileID: 0}
 --- !u!1 &8075328466356995791
 GameObject:
   m_ObjectHideFlags: 0

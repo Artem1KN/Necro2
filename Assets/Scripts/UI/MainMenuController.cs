@@ -19,6 +19,10 @@ public class MainMenuController : MonoBehaviour
 
     [SerializeField] private LoadingScreenController loadingScreen;
 
+    [Header("Audio")]
+    [SerializeField] private AudioClip menuMusic;
+    [SerializeField] private AudioClip buttonClickSfx;
+
     private void Start()
     {
         Cursor.lockState = CursorLockMode.None;
@@ -29,11 +33,21 @@ public class MainMenuController : MonoBehaviour
         if (settingsButton != null) settingsButton.onClick.AddListener(OnSettingsPressed);
         if (quitButton != null) quitButton.onClick.AddListener(OnQuitPressed);
 
+        if (menuMusic != null)
+            AudioManager.EnsureExists().PlayMusic(menuMusic);
+
         ShowMain();
+    }
+
+    private void PlayClick()
+    {
+        if (buttonClickSfx != null)
+            AudioManager.EnsureExists().PlaySfx2D(buttonClickSfx);
     }
 
     private void OnPlayPressed()
     {
+        PlayClick();
         if (loadingScreen != null)
             loadingScreen.LoadScene(firstLevelScene);
         else
@@ -42,11 +56,13 @@ public class MainMenuController : MonoBehaviour
 
     private void OnSettingsPressed()
     {
+        PlayClick();
         ShowSettings();
     }
 
     private void OnQuitPressed()
     {
+        PlayClick();
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else
