@@ -6330,6 +6330,7 @@ GameObject:
   - component: {fileID: 1956185979}
   - component: {fileID: 1956185984}
   - component: {fileID: 1956185983}
+  - component: {fileID: 1956185986}
   - component: {fileID: 1956185982}
   - component: {fileID: 1956185981}
   - component: {fileID: 1956185980}
@@ -6369,6 +6370,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 58c2bcd84a2e844ecb7739c5a5e3e7a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RecoilController
+  cinemachineExtension: {fileID: 1956185986}
   recoilPivot: {fileID: 1956185979}
   snapSpeed: 30
   returnSpeed: 80
@@ -6539,6 +6541,21 @@ MonoBehaviour:
   maxRotationAmplitude: 12
   frequency: 24
   traumaDecay: 1.8
+--- !u!114 &1956185986
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1956185978}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d2c6ea5c51543df489d28f8a3283953e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CinemachineRecoilExtension
+  snapSpeed: 30
+  returnSpeed: 8
+  horizontalJitter: 0.5
 --- !u!1 &1989034106
 GameObject:
   m_ObjectHideFlags: 0
