@@ -109,6 +109,7 @@ GameObject:
   - component: {fileID: 5565235006630647955}
   - component: {fileID: 2412284714082405987}
   - component: {fileID: -8338725257848518065}
+  - component: {fileID: -1649998363401793963}
   m_Layer: 0
   m_Name: Soldier_my_ver
   m_TagString: Untagged
@@ -220,6 +221,8 @@ MonoBehaviour:
   maxHP: 50
   energyOrbPrefab: {fileID: 1856535354971599619, guid: 231c809f890994f59995b6fc9ff40f33, type: 3}
   orbDropOnDeath: {fileID: 11400000, guid: a15ef80bc0fb941e082b2f81d66a894f, type: 2}
+  hurtSfx: {fileID: 0}
+  deathSfx: {fileID: 0}
 --- !u!114 &-8338725257848518065
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -244,7 +247,26 @@ MonoBehaviour:
   playerLayer:
     serializedVersion: 2
     m_Bits: 256
+  fireSfx: {fileID: 0}
   firePoint: {fileID: 6393195560903218695}
+--- !u!114 &-1649998363401793963
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 968817150524308174}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 29d2e8a2a3707a441b6a80f069e590dc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyRagdollController
+  despawnDelay: 6
+  deathImpulse: 1.5
+  shrinkBeforeDestroy: 1
+  disableOnDeath: []
+  animator: {fileID: 0}
+  navAgent: {fileID: 0}
 --- !u!1 &1781775687053022974
 GameObject:
   m_ObjectHideFlags: 0
