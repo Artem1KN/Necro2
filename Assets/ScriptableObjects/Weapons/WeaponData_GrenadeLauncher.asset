@@ -33,3 +33,6 @@ MonoBehaviour:
   recoilStrength: 3
   recoilDuration: 0.1
   spreadAngle: 2
+  fireSfx: {fileID: 8300000, guid: c494b931aa167d84db4bf597b7433245, type: 3}
+  skillSfx: {fileID: 0}
+  overheatSfx: {fileID: 0}
