@@ -16,7 +16,7 @@ MonoBehaviour:
   isAchieved: 1
   baseDamage: 8
   optimalHeatMultiplier: 1.5
-  fireRate: 0.4
+  fireRate: 0.2
   heatPerShot: 5
   appliesToMeleeOnlyOnHit: 0
   passiveCoolingRate: 1
@@ -33,3 +33,6 @@ MonoBehaviour:
   recoilStrength: 2.5
   recoilDuration: 0.12
   spreadAngle: 5
+  fireSfx: {fileID: 8300000, guid: 4bc7f32c22856b34a88837db1fcf0ab6, type: 3}
+  skillSfx: {fileID: 0}
+  overheatSfx: {fileID: 0}

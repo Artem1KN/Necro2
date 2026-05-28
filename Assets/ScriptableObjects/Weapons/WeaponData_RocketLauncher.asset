@@ -14,9 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WeaponData
   weaponName: Rocket Launcher
   isAchieved: 1
-  baseDamage: 80
+  baseDamage: 40
   optimalHeatMultiplier: 1.5
-  fireRate: 1
+  fireRate: 3
   heatPerShot: 25
   appliesToMeleeOnlyOnHit: 0
   passiveCoolingRate: 10
@@ -25,7 +25,7 @@ MonoBehaviour:
   overheatThreshold: 100
   recoveryThreshold: 50
   optimalZoneStart: 70
-  optimalZoneEnd: 90
+  optimalZoneEnd: 100
   skillUsesHeat: 0
   heatPerSkill: 0
   skillCooldown: 0.3
@@ -33,3 +33,6 @@ MonoBehaviour:
   recoilStrength: 5
   recoilDuration: 0.18
   spreadAngle: 1
+  fireSfx: {fileID: 8300000, guid: 2434a7e3d80112d489a97a5c988098ea, type: 3}
+  skillSfx: {fileID: 0}
+  overheatSfx: {fileID: 0}

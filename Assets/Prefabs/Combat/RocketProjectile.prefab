@@ -186,4 +186,4 @@ MonoBehaviour:
     m_RotationOrder: 4
   playerImpulse: 12
   selfDamageMultiplier: 0.25
-  explosionEffectPrefab: {fileID: 0}
+  explosionEffectPrefab: {fileID: 7275548786892498063, guid: 5bc9a0bf98f67d240a936bf476ba2082, type: 3}
