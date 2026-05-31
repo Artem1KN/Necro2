@@ -5,45 +5,37 @@ using UnityEngine.InputSystem;
 public class WeaponManager : MonoBehaviour
 {
     [Header("Weapon Configuration")]
-    [SerializeField] private List<WeaponBase> allWeapons = new List<WeaponBase>();
+    [SerializeField] public List<WeaponBase> allWeapons = new List<WeaponBase>();
     [SerializeField] private int currentSlot = 0;
     [SerializeField] private float quickSwapCooldown = 0.3f;
 
     [Header("References")]
     [SerializeField] private PlayerMotor playerMotor;
-    [SerializeField] private TestPlayerController testPlayer;
     private float quickSwapTimer = 0f;
 
     public WeaponBase ActiveWeapon => (allWeapons != null && allWeapons.Count > 0) ? allWeapons[currentSlot] : null;
     public int CurrentSlot => currentSlot;
     public bool CanQuickSwap => quickSwapTimer <= 0f;
-    public IReadOnlyList<WeaponBase> AllWeapons => allWeapons;
-
-    private MonoBehaviour ActiveController => playerMotor != null ? (MonoBehaviour)playerMotor : testPlayer;
-
-    private float GetCurrentSpeed()
-    {
-        if (playerMotor != null) return playerMotor.currentSpeed;
-        if (testPlayer != null) return testPlayer.currentSpeed;
-        return 0f;
-    }
 
     private int lastSlot = -1; 
 
     private void Awake()
     {
-        if (playerMotor == null) playerMotor = GetComponent<PlayerMotor>();
-        if (testPlayer == null) testPlayer = GetComponent<TestPlayerController>();
+        if (playerMotor == null)
+        {
+            playerMotor = GetComponent<PlayerMotor>();
+        }
     }
 
     private void Start()
     {
-        if (ActiveController == null)
+        if (playerMotor == null)
         {
-            Debug.LogError("[WeaponManager] No player controller assigned (PlayerMotor or TestPlayerController).", this);
+            Debug.LogError("[WeaponManager] PlayerMotor reference missing!");
             return;
         }
 
+        SetupInputActions();
         InitializeWeapons();
         if (allWeapons.Count > 0)
         {
@@ -51,15 +43,24 @@ public class WeaponManager : MonoBehaviour
         }
     }
 
+    private void SetupInputActions()
+    {
+        var playerInput = playerMotor.GetComponent<PlayerInput>();
+        if (playerInput == null)
+        {
+            Debug.LogError("[WeaponManager] PlayerInput component not found on PlayerMotor!");
+            return;
+        }
+    }
+
     private void InitializeWeapons()
     {
-        var controller = ActiveController;
         foreach (var weapon in allWeapons)
         {
             if (weapon != null)
             {
                 weapon.gameObject.SetActive(false);
-                weapon.Initialize(controller);
+                weapon.Initialize(playerMotor);
             }
         }
     }
@@ -105,8 +106,8 @@ public class WeaponManager : MonoBehaviour
         if (newWeapon != null)
         {
             newWeapon.gameObject.SetActive(true);
-            if (playerMotor != null) playerMotor.activeWeapon = newWeapon;
-            if (testPlayer != null) testPlayer.activeWeapon = newWeapon;
+            playerMotor.activeWeapon = newWeapon;
+            // Ensure reference is up to date (Initialize already called)
         }
     }
 
@@ -138,15 +139,17 @@ public class WeaponManager : MonoBehaviour
 
     private void UpdateAllWeaponsHeat()
     {
-        if (allWeapons == null || ActiveController == null) return;
-
-        float speed = GetCurrentSpeed();
-
+        if (allWeapons == null || playerMotor == null) return;
+        float currentSpeed = playerMotor.currentSpeed; // Предполагаю, что это свойство есть в PlayerMotor
         foreach (var weapon in allWeapons)
-        {
-            if (weapon == null) continue;
-            bool isActive = (weapon == ActiveWeapon);
-            weapon.Tick(Time.deltaTime, isActive, speed);
-        }
+            {
+                if (weapon != null)
+                {
+                    // Проверяем, является ли эта пушка текущей активной
+                    bool isActive = (weapon == ActiveWeapon);
+                    // Вызываем Tick. Даже если gameObject деактивирован, ссылка на скрипт в списке allWeapons жива, и метод выполнится.
+                    weapon.Tick(Time.deltaTime, isActive, currentSpeed);
+                }
+            }
     }
 }

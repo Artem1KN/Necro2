@@ -8,6 +8,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 539949157551856658, guid: c44c7978e5ae2b34daca0c492915474d, type: 3}
+      propertyPath: maxHP
+      value: 70
+      objectReference: {fileID: 0}
     - target: {fileID: 3131566208597649599, guid: c44c7978e5ae2b34daca0c492915474d, type: 3}
       propertyPath: m_Name
       value: ToonSoldier_demo + anim + ragdoll Variant

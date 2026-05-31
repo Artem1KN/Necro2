@@ -31,27 +31,31 @@ public class AI_Soldier : MonoBehaviour
     [Header("Audio")]
     public AudioClip fireSfx;
 
-    private enum State { Chase, Attack }
+    private enum State { Chase, Attack, Dead }
 
     private EnemyBase enemyBase;
     private Transform targetTransform;
     private Rigidbody rb;
-
     private State currentState = State.Chase;
     private float lastAttackTime = -Mathf.Infinity;
 
     private float EffectiveAccuracy => Mathf.Clamp01(accuracy + aggressiveness * 0.3f);
     private float EffectiveCooldown => attackCooldown * Mathf.Clamp(1f - aggressiveness * 0.5f, 0.1f, 1f);
+    
+    public Transform firePoint;
 
     private Animator anim; // Добавляем переменную для аниматора
-
-    public Transform firePoint; 
 
     private void Awake()
     {
         enemyBase = GetComponent<EnemyBase>();
         rb = GetComponent<Rigidbody>();
         anim = GetComponent<Animator>(); // Инициализируем аниматор
+
+        if (enemyBase != null)
+        {
+            enemyBase.onDeath += () => currentState = State.Dead;
+        }
     }
 
     private void Start()
@@ -65,7 +69,7 @@ public class AI_Soldier : MonoBehaviour
 
     private void Update()
     {
-        if (targetTransform == null) return;
+        if (targetTransform == null || currentState == State.Dead) return;
 
         float distance = Vector3.Distance(transform.position, targetTransform.position);
         currentState = distance <= fireDistance ? State.Attack : State.Chase;

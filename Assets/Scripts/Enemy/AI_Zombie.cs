@@ -18,7 +18,7 @@ public class AI_Zombie : MonoBehaviour
     [Header("Audio")]
     public AudioClip attackSfx;
 
-    private enum State { Chase, Attack }
+    private enum State { Chase, Attack, Dead }
 
     private EnemyBase enemyBase;
     private Transform targetTransform;
@@ -34,6 +34,11 @@ public class AI_Zombie : MonoBehaviour
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
         anim = GetComponent<Animator>(); // Инициализируем аниматор
+
+        if (enemyBase != null)
+        {
+            enemyBase.onDeath += () => currentState = State.Dead;
+        }
     }
 
     private void Start()
@@ -48,7 +53,7 @@ public class AI_Zombie : MonoBehaviour
 
     private void Update()
     {
-        if (targetTransform == null) return;
+        if (targetTransform == null || currentState == State.Dead) return;
 
         Vector3 toPlayer = targetTransform.position - transform.position;
         toPlayer.y = 0f;

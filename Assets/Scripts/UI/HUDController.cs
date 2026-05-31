@@ -1,3 +1,4 @@
+/*
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -138,3 +139,4 @@ public class HUDController : MonoBehaviour
         if (speedText != null) speedText.text = $"{Mathf.RoundToInt(speed)}";
     }
 }
+*/

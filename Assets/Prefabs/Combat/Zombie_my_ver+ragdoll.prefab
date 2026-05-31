@@ -3826,8 +3826,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyBase
   maxHP: 50
-  energyOrbPrefab: {fileID: 0}
-  orbDropOnDeath: {fileID: 0}
+  energyOrbPrefab: {fileID: 1856535354971599619, guid: 231c809f890994f59995b6fc9ff40f33, type: 3}
+  orbDropOnDeath: {fileID: 11400000, guid: 5ed84c1190f7d4c8fb444794ca26dd83, type: 2}
   hurtSfx: {fileID: 0}
   deathSfx: {fileID: 0}
 --- !u!114 &7755816590278518878
@@ -3866,6 +3866,7 @@ MonoBehaviour:
   despawnDelay: 6
   deathImpulse: 1.5
   shrinkBeforeDestroy: 1
+  disableBoneCollidersWhileAlive: 1
   disableOnDeath: []
   animator: {fileID: 8472042981752385240}
   navAgent: {fileID: 0}

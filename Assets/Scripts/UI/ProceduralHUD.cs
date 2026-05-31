@@ -421,7 +421,7 @@ public class ProceduralHUD : MonoBehaviour
     private void UpdateHotbar()
     {
         if (weaponManager == null) return;
-        var weapons = weaponManager.AllWeapons;
+        var weapons = weaponManager.allWeapons;
         if (weapons == null) return;
 
         while (slots.Count < weapons.Count) slots.Add(BuildSlot(slots.Count));
